@@ -14,7 +14,7 @@ typedef struct {
     char name[MAX_SIZE];
     char surname[MAX_SIZE];
     char ID[MAX_SIZE];
-} VAX_REQUEST; 
+} VAX_REQUEST;
 
 ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
@@ -80,7 +80,7 @@ VAX_REQUEST create_package() {
         }
         //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
         buffer[strlen(buffer) - 1] = 0;
-        if (strlen(buffer) != 10) printf("Numero caratteri sanitaria non corretto, riprovare\n\n");
+        if (strlen(buffer) != 10) printf("Numero caratteri sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else break;
     }
     strcpy(temp.ID, buffer);
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 	alias = data -> h_addr_list;
     addr = (char *)inet_ntop(data -> h_addrtype, *alias, buffer, sizeof(buffer));
 
-    //Conversione dell'indirizzo IP dal formato dotted decimal a stringa di bit   
+    //Conversione dell'indirizzo IP dal formato dotted decimal a stringa di bit
     if (inet_pton(AF_INET, addr, &server_addr.sin_addr) <= 0) {
         perror("inet_pton error");
         exit(1);
@@ -170,5 +170,3 @@ int main(int argc, char **argv) {
 
     exit(0);
 }
-
-

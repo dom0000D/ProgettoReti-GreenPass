@@ -13,7 +13,7 @@ typedef struct {
     char name[MAX_SIZE];
     char surname[MAX_SIZE];
     char ID[MAX_SIZE];
-} VAX_REQUEST; 
+} VAX_REQUEST;
 
 ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
@@ -96,12 +96,12 @@ int main(int argc, char const *argv[]) {
 
         if (pid == 0) {
             close(listen_fd);
-            
+
             //Scegliamo un centro vaccinale casuale
             srand(time(NULL));
             index = rand() % 10;
 
-            snprintf(buffer, MAX_SIZE, "Benvenuto nel centro vaccinale %s\nInserire nome, cognome, numero di tessera sanitaria\n", hub_name[index]);
+            snprintf(buffer, MAX_SIZE, "***Benvenuto nel centro vaccinale %s***\nInserisci nome, cognome e numero di tessera sanitaria per inserirli sulla piattaforma.\n", hub_name[index]);
             welcome_size = sizeof(buffer);
             if(full_write(connect_fd, &welcome_size, sizeof(int)) < 0) {
                 perror("full_write error");
@@ -121,9 +121,9 @@ int main(int argc, char const *argv[]) {
                 exit(1);
             }
 
-            printf("\nnome: %s\n", package.name);
-            printf("cognome: %s\n", package.surname);
-            printf("numero tessera sanitaria: %s\n", package.ID);
+            printf("\nNome: %s\n", package.name);
+            printf("Cognome: %s\n", package.surname);
+            printf("Numero Tessera Sanitaria: %s\n", package.ID);
 
             snprintf(buffer, MAX_SIZE, "\nI tuoi dati sono stati correttamente inseriti in piattaforma\n");
             welcome_size = sizeof(buffer);
@@ -141,6 +141,6 @@ int main(int argc, char const *argv[]) {
         } else {
             close(connect_fd);
         }
-    }    
+    }
     exit(0);
 }

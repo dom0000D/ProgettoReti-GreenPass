@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#define MAX_SIZE 100
+#define MAX_SIZE 1024
 
 //Definiamo il pacchetto applicazione per lo user da inviare al client centro vaccinale
 typedef struct {
@@ -80,7 +80,7 @@ VAX_REQUEST create_package() {
         }
         //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
         buffer[strlen(buffer) - 1] = 0;
-        if (strlen(buffer) != 10) printf("Numero caratteri sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
+        if (strlen(buffer) != 10) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else break;
     }
     strcpy(temp.ID, buffer);

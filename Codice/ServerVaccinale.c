@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 #include <time.h>
 #define MAX_SIZE 1024
-
+//Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
 ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_read;
@@ -25,6 +25,7 @@ ssize_t full_read(int fd, void *buffer, size_t count) {
     return n_left;
 }
 
+//Scrive esattamente count byte s iterando opportunamente le scritture. Scrive anche se viene interrotta da una System Call.
 ssize_t full_write(int fd, const void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_written;
@@ -54,7 +55,7 @@ int main(int argc, char const *argv[]) {
 
     //Valorizzazione strutture
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY); //INADDR_ANY: Viene utilizzato come indirizzo del server, l’applicazione accetterà connessioni da qualsiasi indirizzo associato al server.
     serv_addr.sin_port = htons(1024);
 
     //Assegnazione della porta al server

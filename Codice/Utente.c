@@ -16,6 +16,7 @@ typedef struct {
     char ID[MAX_SIZE];
 } VAX_REQUEST;
 
+//Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
 ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_read;
@@ -32,6 +33,8 @@ ssize_t full_read(int fd, void *buffer, size_t count) {
     return n_left;
 }
 
+
+//Scrive esattamente count byte s iterando opportunamente le scritture. Scrive anche se viene interrotta da una System Call.
 ssize_t full_write(int fd, const void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_written;
@@ -98,7 +101,7 @@ int main(int argc, char **argv) {
 	struct hostent *data;
 
     if (argc != 2) {
-        perror("usage: <host name>");
+        perror("usage: <host name>"); //perror: Produce un messaggio sullo standard error che descrive l’ultimo errore avvenuto durante una System call o una funzione di libreria.
         exit(1);
     }
 
@@ -118,9 +121,10 @@ int main(int argc, char **argv) {
 		exit(1);
     }
 	alias = data -> h_addr_list;
-    addr = (char *)inet_ntop(data -> h_addrtype, *alias, buffer, sizeof(buffer));
+    addr = (char *)inet_ntop(data -> h_addrtype, *alias, buffer, sizeof(buffer)); //inet_ntop converte un indirizzo in una stringa:
 
-    //Conversione dell'indirizzo IP dal formato dotted decimal a stringa di bit
+
+     //Conversione dell’indirizzo IP, preso in input come stringa in formato dotted, in un indirizzo di rete in network order.
     if (inet_pton(AF_INET, addr, &server_addr.sin_addr) <= 0) {
         perror("inet_pton error");
         exit(1);

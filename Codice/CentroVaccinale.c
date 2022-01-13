@@ -17,14 +17,14 @@ typedef struct {
     char ID[MAX_SIZE];
 } VAX_REQUEST;
 
-//Struct contente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
+//Struct contente la di inizio validità del green pass formato dai campi giorno, mese ed anno  
 typedef struct {
     int day;
     int month;
     int year;
 } START_DATE;
 
-//Struct contente la data del giorno della scadenza della validità del green pass formato dai campi giorno, mese ed anno
+//Struct contente la data della scadenza della validità del green pass formato dai campi giorno, mese ed anno
 typedef struct {
     int day;
     int month;
@@ -82,15 +82,15 @@ void create_expire(EXPIRE_DATE *expire_date, START_DATE *start_date) {
     e_date->tm_year += 1900;       //Sommiamo 1900 perchè gli anni partono dal 122 (2022 - 1900)
     
     //Effettuiamo il controllo nel caso in cui il vaccino sia stato fatto nel mese di ottobre, novembre o dicembre, comportando un aumento dell'anno
-    if (e_date->tm_mon == 13) {
+    if (e_date->tm_mon == 13) { //if 13 è ottobre quindi si incrementano 3 mesi, arrivando a gennaio dell'anno successivo
         e_date->tm_mon = 1;
         e_date->tm_year++;
     }
-    if (e_date->tm_mon == 14) {
+    if (e_date->tm_mon == 14) { //if 14 è novembre quindi si incrementano 3 mesi, arrivando a febbraio dell'anno successivo
         e_date->tm_mon = 2;
         e_date->tm_year++;
     }
-    if (e_date->tm_mon == 15) {
+    if (e_date->tm_mon == 15) { //if 15 è dicembre quindi si incrementano 3 mesi, arrivando a marzo dell'anno successivo
         e_date->tm_mon = 3;
         e_date->tm_year++;
     }
@@ -142,7 +142,7 @@ void send_GP(GP_REQUEST gp_request) {
 
 //Funzione per la gestione della comunicazione con l'utente
 void answer_user(int connect_fd) {
-    char *hub_name[] = {"Milano", "Napoli", "Roma", "Torino", "Firenze", "Palermo", "Bari", "Catanzaro", "Bologna", "Udine"};
+    char *hub_name[] = {"Milano", "Napoli", "Roma", "Torino", "Firenze", "Palermo", "Bari", "Catanzaro", "Bologna", "Udine"}; //Centri Vaccinali
     char buffer[MAX_SIZE];
     int index, welcome_size, package_size;
     VAX_REQUEST package;
@@ -153,7 +153,8 @@ void answer_user(int connect_fd) {
     //Scegliamo un centro vaccinale casuale
     srand(time(NULL));
     index = rand() % 10;
-
+    
+    //Stampa un messaggo di benvenuto da inviare all'utente quando si collega al centro vaccinale.
     snprintf(buffer, MAX_SIZE, "***Benvenuto nel centro vaccinale di %s***\nInserisci nome, cognome e numero di tessera sanitaria per inserirli sulla piattaforma.\n", hub_name[index]);
     welcome_size = sizeof(buffer);
     if(full_write(connect_fd, &welcome_size, sizeof(int)) < 0) {
@@ -178,6 +179,7 @@ void answer_user(int connect_fd) {
     printf("Cognome: %s\n", package.surname);
     printf("Numero Tessera Sanitaria: %s\n", package.ID);
 
+    //Notifica all'utente la corretta ricezione dei dati che aveva inviato.
     snprintf(buffer, MAX_SIZE, "\nI tuoi dati sono stati correttamente inseriti in piattaforma\n");
     welcome_size = sizeof(buffer);
     if(full_write(connect_fd, &welcome_size, sizeof(int)) < 0) {

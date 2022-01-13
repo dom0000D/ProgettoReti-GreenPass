@@ -1,6 +1,5 @@
 # ProgettoReti-Green Pass 2022
 
-#Descrizione
 ![LogoGP](https://user-images.githubusercontent.com/56475652/149366490-3bea887e-148b-48a1-ae31-0d6a3d706626.png)
 
 

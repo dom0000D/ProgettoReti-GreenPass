@@ -17,7 +17,7 @@ typedef struct {
     char ID[MAX_SIZE];
 } VAX_REQUEST;
 
-//Struct contente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
+//Struct contenente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
 typedef struct {
     int day;
     int month;
@@ -72,10 +72,12 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
+//Funzione che salva i dati ricevuti dal centro vaccinale in un filesystem.
 void save_GP(GP_REQUEST gp_request) {
     int fd;
     char buffer[MAX_SIZE];
 
+    //Per ogni Tessera Sanitaria crea un file contenente i dati ricevuti.
     if ((fd = open(gp_request.ID, O_RDWR| O_CREAT | O_TRUNC, 0777)) < 0) {
         perror("fopen() error");
         exit(1);

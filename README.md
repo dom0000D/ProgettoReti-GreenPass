@@ -1,5 +1,5 @@
 # ProgettoReti-Green Pass 2022
-![LogoGP](../../Desktop/LogoGP.png)
+![](../../Desktop/LogoGP.png)
 #Descrizione
 
 Green Pass

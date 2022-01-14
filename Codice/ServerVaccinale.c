@@ -3,11 +3,12 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <time.h>
-#define MAX_SIZE 1024
+#define MAX_SIZE 2048
 
 //Struct del pacchetto che il centro vaccinale deve ricevere dall'utente contentente nome, cognome e numero di tessera sanitaria dell'utente
 typedef struct {
@@ -16,7 +17,7 @@ typedef struct {
     char ID[MAX_SIZE];
 } VAX_REQUEST;
 
-//Struct contente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
+//Struct contenente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
 typedef struct {
     int day;
     int month;
@@ -71,11 +72,36 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
+//Funzione che salva i dati ricevuti dal centro vaccinale in un filesystem.
+void save_GP(GP_REQUEST gp_request) {
+    int fd;
+    char buffer[MAX_SIZE];
+
+    //Per ogni Tessera Sanitaria crea un file contenente i dati ricevuti.
+    if ((fd = open(gp_request.ID, O_RDWR| O_CREAT | O_TRUNC, 0777)) < 0) {
+        perror("fopen() error");
+        exit(1);
+    }
+    snprintf(buffer, MAX_SIZE, "Codice fiscale: %s", gp_request.ID);
+    if (write(fd, gp_request.ID, strlen(buffer)) < 0) {
+        perror("write() error");
+    }
+    snprintf(buffer, MAX_SIZE, "\nStart date: %d/%d/%d\n", gp_request.start_date.day, gp_request.start_date.month, gp_request.start_date.year);
+    if (write(fd, buffer, strlen(buffer)) < 0) {
+        perror("write() error");
+    }
+    snprintf(buffer, MAX_SIZE, "Expire date: %d/%d/%d\n", gp_request.expire_date.day, gp_request.expire_date.month, gp_request.expire_date.year);
+    if (write(fd, buffer, strlen(buffer)) < 0) {
+        perror("write() error");
+    }
+}
+
 int main(int argc, char const *argv[]) {
     int listen_fd, connect_fd, package_size;
     struct sockaddr_in serv_addr;
     pid_t pid;
     GP_REQUEST package;
+    char buffer[MAX_SIZE];
 
     //Creazione descrizione del socket
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -102,6 +128,8 @@ int main(int argc, char const *argv[]) {
 
     for (;;) {
 
+        printf("In attesa di nuovi dati\n");
+
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {
             perror("accept() error");
@@ -117,18 +145,13 @@ int main(int argc, char const *argv[]) {
         if (pid == 0) {
             close(listen_fd);
 
-            if(full_read(connect_fd, &package_size, sizeof(int)) < 0) {
+            if(full_read(connect_fd, &package, sizeof(GP_REQUEST)) < 0) {
                 perror("full_read error");
                 exit(1);
             }
-            if(full_read(connect_fd, &package, package_size) < 0) {
-                perror("full_read error");
-                exit(1);
-            }
+            printf("Dati ricevuti con successo\n");
 
-            printf("\nID: %s\n", package.ID);
-            printf("Day: %d\n", package.expire_date.day);
-            printf("Day: %d\n", package.start_date.day);
+            save_GP(package);
 
             close(connect_fd);
             exit(0);

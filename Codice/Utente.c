@@ -8,12 +8,14 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #define MAX_SIZE 1024
+#define ID_SIZE 11
+#define ACK_SIZE 61
 
 //Definiamo il pacchetto applicazione per lo user da inviare al client centro vaccinale
 typedef struct {
     char name[MAX_SIZE];
     char surname[MAX_SIZE];
-    char ID[MAX_SIZE];
+    char ID[ID_SIZE];
 } VAX_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -58,35 +60,35 @@ VAX_REQUEST create_package() {
 
     //Inserimento nome
     printf("Inserisci nome: ");
-    if (fgets(buffer, MAX_SIZE, stdin) == NULL) {
-        perror("fgets error");
+    if (fgets(temp.name, MAX_SIZE, stdin) == NULL) {
+        perror("fgets() error");
     }
     //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-    buffer[strlen(buffer) - 1] = 0;
-    strcpy(temp.name, buffer);
+    temp.name[strlen(temp.name) - 1] = 0;
 
     //Inserimento cognome
     printf("Inserisci cognome: ");
-    if (fgets(buffer, MAX_SIZE, stdin) == NULL) {
-        perror("fgets error");
+    if (fgets(temp.surname, MAX_SIZE, stdin) == NULL) {
+        perror("fgets() error");
     }
     //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-    buffer[strlen(buffer) - 1] = 0;
-    strcpy(temp.surname, buffer);
+    temp.surname[strlen(temp.surname) - 1] = 0;
 
     //Inserimento codice tessera sanitaria
     while (1) {
         printf("Inserisci codice tessera sanitaria [Massimo 10 caratteri]: ");
         if (fgets(buffer, MAX_SIZE, stdin) == NULL) {
-            perror("fgets error");
+            perror("fgets() error");
             exit(1);
         }
-        //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-        buffer[strlen(buffer) - 1] = 0;
-        if (strlen(buffer) != 10) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
-        else break;
+        if (strlen(buffer) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
+        else {
+            strcpy(temp.ID, buffer); 
+            //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
+            temp.ID[ID_SIZE - 1] = 0;  
+            break;
+        }
     }
-    strcpy(temp.ID, buffer);
 
     return temp;
 }
@@ -107,7 +109,7 @@ int main(int argc, char **argv) {
 
     //Creazione del descrittore del socket
     if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket error");
+        perror("socket() error");
         exit(1);
     }
 
@@ -117,32 +119,36 @@ int main(int argc, char **argv) {
 
     //Conversione dal nome al dominio a indirizzo IP
     if ((data = gethostbyname(argv[1])) == NULL) {
-        herror("gethostbyname error");
+        herror("gethostbyname() error");
 		exit(1);
     }
 	alias = data -> h_addr_list;
-    addr = (char *)inet_ntop(data -> h_addrtype, *alias, buffer, sizeof(buffer)); //inet_ntop converte un indirizzo in una stringa:
 
+    //inet_ntop converte un indirizzo in una stringa:
+    if ((addr = (char *)inet_ntop(data -> h_addrtype, *alias, buffer, sizeof(buffer))) < 0) {
+        perror("inet_ntop() error");
+        exit(1);
+    }
 
-     //Conversione dell’indirizzo IP, preso in input come stringa in formato dotted, in un indirizzo di rete in network order.
+    //Conversione dell’indirizzo IP, preso in input come stringa in formato dotted, in un indirizzo di rete in network order.
     if (inet_pton(AF_INET, addr, &server_addr.sin_addr) <= 0) {
-        perror("inet_pton error");
+        perror("inet_pton() error");
         exit(1);
     }
 
     //Effettua connessione con il server
     if (connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        perror("connect error");
+        perror("connect() error");
         exit(1);
     }
 
     //Riceve il benevenuto dal centro vaccinale
     if (full_read(socket_fd, &welcome_size, sizeof(int)) < 0) {
-        perror("full_read error");
+        perror("full_read() error");
         exit(1);
     }
     if (full_read(socket_fd, buffer, welcome_size) < 0) {
-        perror("full_read error");
+        perror("full_read() error");
         exit(1);
     }
     printf("%s\n", buffer);
@@ -151,23 +157,14 @@ int main(int argc, char **argv) {
     package = create_package();
 
     //Invio del pacchetto richiesto al centro vaccinale
-    package_size = sizeof(package);
-    if (full_write(socket_fd, &package_size, sizeof(int))) {
-        perror("full_write error");
-        exit(1);
-    }
-    if (full_write(socket_fd, &package, package_size)) {
-        perror("full_write error");
+    if (full_write(socket_fd, &package, sizeof(package)) < 0) {
+        perror("full_write() error");
         exit(1);
     }
 
     //Ricezione dell'ack
-    if (full_read(socket_fd, &welcome_size, sizeof(int)) < 0) {
-        perror("full_read error");
-        exit(1);
-    }
-    if (full_read(socket_fd, buffer, welcome_size) < 0) {
-        perror("full_read error");
+    if (full_read(socket_fd, buffer, ACK_SIZE) < 0) {
+        perror("full_read() error");
         exit(1);
     }
     printf("%s\n\n", buffer);

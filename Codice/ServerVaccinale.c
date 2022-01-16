@@ -9,13 +9,7 @@
 #include <arpa/inet.h>
 #include <time.h>
 #define MAX_SIZE 2048
-
-//Struct del pacchetto che il centro vaccinale deve ricevere dall'utente contentente nome, cognome e numero di tessera sanitaria dell'utente
-typedef struct {
-    char name[MAX_SIZE];
-    char surname[MAX_SIZE];
-    char ID[MAX_SIZE];
-} VAX_REQUEST;
+#define ID_SIZE 11
 
 //Struct contenente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
 typedef struct {
@@ -33,7 +27,7 @@ typedef struct {
 
 //Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
 typedef struct {
-    char ID[MAX_SIZE];
+    char ID[ID_SIZE];
     START_DATE start_date;
     EXPIRE_DATE expire_date; 
 } GP_REQUEST;
@@ -73,35 +67,62 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
 }
 
 //Funzione che salva i dati ricevuti dal centro vaccinale in un filesystem.
-void save_GP(GP_REQUEST gp_request) {
+void save_GP(GP_REQUEST gp) {
     int fd;
+    GP_REQUEST temp;
     char buffer[MAX_SIZE];
 
     //Per ogni Tessera Sanitaria crea un file contenente i dati ricevuti.
-    if ((fd = open(gp_request.ID, O_RDWR| O_CREAT | O_TRUNC, 0777)) < 0) {
+    if ((fd = open(gp.ID, O_RDWR| O_CREAT | O_TRUNC, 0777)) < 0) {
         perror("fopen() error");
         exit(1);
     }
-    snprintf(buffer, MAX_SIZE, "Codice fiscale: %s", gp_request.ID);
-    if (write(fd, gp_request.ID, strlen(buffer)) < 0) {
-        perror("write() error");
-    }
-    snprintf(buffer, MAX_SIZE, "\nStart date: %d/%d/%d\n", gp_request.start_date.day, gp_request.start_date.month, gp_request.start_date.year);
-    if (write(fd, buffer, strlen(buffer)) < 0) {
-        perror("write() error");
-    }
-    snprintf(buffer, MAX_SIZE, "Expire date: %d/%d/%d\n", gp_request.expire_date.day, gp_request.expire_date.month, gp_request.expire_date.year);
-    if (write(fd, buffer, strlen(buffer)) < 0) {
-        perror("write() error");
-    }
+    snprintf(buffer, MAX_SIZE, "%02d:%02d:%02d\n", gp.start_date.day, gp.start_date.month, gp.start_date.year);
+    write(fd, buffer, strlen(buffer));
+    snprintf(buffer, MAX_SIZE, "%02d:%02d:%02d\n", gp.expire_date.day, gp.expire_date.month, gp.expire_date.year);
+    write(fd, buffer, strlen(buffer));
 }
 
-int main(int argc, char const *argv[]) {
+void SV_comunication(int connect_fd) {
+    char ID[ID_SIZE], report = '1';
+
+    //Riceve il numero di tessera sanitaria dal ServerVerifica
+    if (full_read(connect_fd, ID, ID_SIZE) < 0) {
+        perror("full_read() error");
+        exit(1);
+    }
+    if (full_write(connect_fd, &report, sizeof(char)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+
+}
+
+void CV_comunication(int connect_fd) {
+    GP_REQUEST gp;
+
+    if (full_read(connect_fd, gp.ID, ID_SIZE) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+    if (full_read(connect_fd, &gp.start_date, sizeof(START_DATE)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+    if (full_read(connect_fd, &gp.expire_date, sizeof(EXPIRE_DATE)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+    printf("Nuovo green pass ricevuto\n");
+
+    save_GP(gp);
+}
+
+int main() {
     int listen_fd, connect_fd, package_size;
     struct sockaddr_in serv_addr;
     pid_t pid;
-    GP_REQUEST package;
-    char buffer[MAX_SIZE];
+    char start_bit;
 
     //Creazione descrizione del socket
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -142,22 +163,27 @@ int main(int argc, char const *argv[]) {
             exit(1);
         }
 
+        //Porzione di codice eseguita dal figlio
         if (pid == 0) {
             close(listen_fd);
 
-            if(full_read(connect_fd, &package, sizeof(GP_REQUEST)) < 0) {
-                perror("full_read error");
+            /*
+                Il ServerVaccinale riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome due connessioni differenti. 
+                Quando riceve come bit 1 allora il figlio gestirà la connessione con il CentroVaccinale.
+                Quando riceve come bit 0 allora il figlio gestirà la connessione con il ServerVerifica.
+            */
+            if (full_read(connect_fd, &start_bit, sizeof(char)) < 0) {
+                perror("full_read() error");
                 exit(1);
             }
-            printf("Dati ricevuti con successo\n");
-
-            save_GP(package);
+            printf("start bit: %c\n", start_bit);
+            if (start_bit == '1') CV_comunication(connect_fd);
+            else if (start_bit == '0') SV_comunication(connect_fd);
+            else printf("Client non riconosciuto\n");
 
             close(connect_fd);
             exit(0);
-        } else {
-            close(connect_fd);
-        }
+        } else close(connect_fd); //Porzione di codice eseguita dal padre
     }
     exit(0);
 }

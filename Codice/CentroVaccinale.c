@@ -9,12 +9,14 @@
 #include <time.h>
 #include <netdb.h>
 #define MAX_SIZE 1024
+#define ID_SIZE 11
+#define ACK_SIZE 61
 
 //Struct del pacchetto che il centro vaccinale deve ricevere dall'utente contentente nome, cognome e numero di tessera sanitaria dell'utente
 typedef struct {
     char name[MAX_SIZE];
     char surname[MAX_SIZE];
-    char ID[MAX_SIZE];
+    char ID[ID_SIZE];
 } VAX_REQUEST;
 
 //Struct contente la di inizio validità del green pass formato dai campi giorno, mese ed anno  
@@ -33,7 +35,7 @@ typedef struct {
 
 //Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
 typedef struct {
-    char ID[MAX_SIZE];
+    char ID[ID_SIZE];
     START_DATE start_date;
     EXPIRE_DATE expire_date; 
 } GP_REQUEST;
@@ -71,13 +73,12 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
 }
 
 //Funzione per calcolare la data di scadenza e la data di inizio validità del green pass
-void create_expire(EXPIRE_DATE *expire_date, START_DATE *start_date) {
+void create_expire_date(EXPIRE_DATE *expire_date) {
     time_t ticks;
     ticks = time(NULL);
     
     //Dichiarazione strutture per la conversione della data da stringa ad intero
-    struct tm *e_date = localtime(&ticks); 
-    struct tm *s_date = localtime(&ticks);
+    struct tm *e_date = localtime(&ticks);
     e_date->tm_mon += 4;           //Sommiamo 4 perchè i mesi vanno da 0 ad 11
     e_date->tm_year += 1900;       //Sommiamo 1900 perchè gli anni partono dal 122 (2022 - 1900)
     
@@ -94,25 +95,42 @@ void create_expire(EXPIRE_DATE *expire_date, START_DATE *start_date) {
         e_date->tm_mon = 3;
         e_date->tm_year++;
     }
+
     printf("La data di scadenza del green pass e': %02d:%02d:%02d\n", e_date->tm_mday, e_date->tm_mon, e_date->tm_year);
     
     //Assegnamo i valori ai parametri di ritorno
     expire_date->day = e_date->tm_mday ;
     expire_date->month = e_date->tm_mon;
     expire_date->year = e_date->tm_year;
-    start_date->day = s_date->tm_mday;
+}
+
+void create_start_date(START_DATE *start_date) {
+    time_t ticks;
+    ticks = time(NULL);
+
+    //Dichiarazione strutture per la conversione della data da stringa ad intero
+    struct tm *s_date = localtime(&ticks);
+    s_date->tm_mon += 1;           //Sommiamo 1 perchè i mesi vanno da 0 ad 11
+    s_date->tm_year += 1900;       //Sommiamo 1900 perchè gli anni partono dal 122 (2022 - 1900)
+
+    printf("La data di inizio validità del green pass e': %02d:%02d:%02d\n", s_date->tm_mday, s_date->tm_mon, s_date->tm_year);
+
+    //Assegnamo i valori ai parametri di ritorno
+    start_date->day = s_date->tm_mday ;
     start_date->month = s_date->tm_mon;
     start_date->year = s_date->tm_year;
 }
 
-void send_GP(GP_REQUEST gp_request) {
-    int socket_fd, gp_request_size;
+void send_GP(char ID[], START_DATE start_date, EXPIRE_DATE expire_date) {
+    int socket_fd;
     struct sockaddr_in server_addr;
-    char buffer[MAX_SIZE];
+    char start_bit, buffer[MAX_SIZE];
+
+    start_bit = '1';
 
     //Creazione del descrittore del socket
     if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket error");
+        perror("socket() error");
         exit(1);
     }
 
@@ -122,18 +140,35 @@ void send_GP(GP_REQUEST gp_request) {
 
     //Conversione dell'indirizzo IP dal formato dotted decimal a stringa di bit
     if (inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr) <= 0) {
-        perror("inet_pton error");
+        perror("inet_pton() error");
         exit(1);
     }
 
     //Effettua connessione con il server
     if (connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        perror("connect error");
+        perror("connect() error");
         exit(1);
     }
 
-    if (full_write(socket_fd, &gp_request, sizeof(gp_request)) < 0) {
-        perror("full_write error");
+    //Invia un bit di valore 1 al ServerVaccinale per informarlo che la comunicazione deve avvenire con il CentroVaccinale
+    if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+
+    //Invia il numero di tessera saniraria al ServerVaccinale
+    if (full_write(socket_fd, ID, ID_SIZE) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+    //Invia il giorno di inizio validità del GreenPass al ServerVaccinale
+    if (full_write(socket_fd, &start_date, sizeof(start_date)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+    //Invia il giorno di scadenza del GreenPass al ServerVaccinale
+    if (full_write(socket_fd, &expire_date, sizeof(expire_date)) < 0) {
+        perror("full_write() error");
         exit(1);
     }
 
@@ -158,50 +193,42 @@ void answer_user(int connect_fd) {
     snprintf(buffer, MAX_SIZE, "***Benvenuto nel centro vaccinale di %s***\nInserisci nome, cognome e numero di tessera sanitaria per inserirli sulla piattaforma.\n", hub_name[index]);
     welcome_size = sizeof(buffer);
     if(full_write(connect_fd, &welcome_size, sizeof(int)) < 0) {
-        perror("full_write error");
+        perror("full_write() error");
         exit(1);
     }
     if(full_write(connect_fd, buffer, welcome_size) < 0) {
-        perror("full_write error");
+        perror("full_write() error");
         exit(1);
     }
 
-    if(full_read(connect_fd, &package_size, sizeof(int)) < 0) {
-        perror("full_read error");
-        exit(1);
-    }
-    if(full_read(connect_fd, &package, package_size) < 0) {
-        perror("full_read error");
+    //Riceviamo le informazioni per il GreenPass dall'Utente
+    if(full_read(connect_fd, &package, sizeof(VAX_REQUEST)) < 0) {
+        perror("full_read() error");
         exit(1);
     }
 
-    printf("\nNome: %s\n", package.name);
+    printf("\nDati ricevuti\n");
+    printf("Nome: %s\n", package.name);
     printf("Cognome: %s\n", package.surname);
-    printf("Numero Tessera Sanitaria: %s\n", package.ID);
+    printf("Numero Tessera Sanitaria: %s\n\n", package.ID);
 
     //Notifica all'utente la corretta ricezione dei dati che aveva inviato.
-    snprintf(buffer, MAX_SIZE, "\nI tuoi dati sono stati correttamente inseriti in piattaforma\n");
-    welcome_size = sizeof(buffer);
-    if(full_write(connect_fd, &welcome_size, sizeof(int)) < 0) {
-        perror("full_write error");
+    snprintf(buffer, ACK_SIZE, "I tuoi dati sono stati correttamente inseriti in piattaforma");
+    if(full_write(connect_fd, buffer, ACK_SIZE) < 0) {
+        perror("full_write() error");
         exit(1);
     }
-    if(full_write(connect_fd, buffer, welcome_size) < 0) {
-        perror("full_write error");
-        exit(1);
-    }
+
+    //Si ottiene la data di inizo validità del Green Pass
+    create_start_date(&start_date);
 
     //Crea la data di scadenza (3 mesi)
-    create_expire(&expire_date, &start_date);  
-
-    //Copio la stringa del codice fiscale dal pacchetto utente al pacchetto da inviare al centro vaccinale
-    strcpy(gp_request.ID, package.ID);
-    gp_request.expire_date = expire_date;
-    gp_request.start_date = start_date;
-
+    create_expire_date(&expire_date); 
+    
     close(connect_fd);
 
-    send_GP(gp_request);
+    //Funzione per mandare il nuovo Green Pass al CentroVaccinale
+    send_GP(package.ID, start_date, expire_date);
 }
 
 int main(int argc, char const *argv[]) {
@@ -257,9 +284,7 @@ int main(int argc, char const *argv[]) {
           
             close(connect_fd);
             exit(0);
-        } else {
-            close(connect_fd);
-        }
+        } else close(connect_fd);
     }
     exit(0);
 }

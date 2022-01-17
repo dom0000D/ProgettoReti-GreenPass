@@ -79,8 +79,9 @@ int main() {
     }
     printf("%s\n", buffer);
 
+     //Controllo che la tessera sia esattamente di 10 caratteri
     while (1) {
-        printf("Inserisci il numero di tessera sanitaria da scansionare [Massimo 10 caratteri]: ");
+        printf("Inserisci un numero di tessera sanitaria da scansionare [Massimo 10 caratteri]: ");
         if (fgets(ID, ID_SIZE, stdin) == NULL) {
             perror("fgets() error");
             exit(1);

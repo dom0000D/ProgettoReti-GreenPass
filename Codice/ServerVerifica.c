@@ -11,6 +11,7 @@
 #define MAX_SIZE 1024
 #define ID_SIZE 11
 
+//Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
 ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_read;
@@ -27,6 +28,7 @@ ssize_t full_read(int fd, void *buffer, size_t count) {
     return n_left;
 }
 
+//Scrive esattamente count byte s iterando opportunamente le scritture. Scrive anche se viene interrotta da una System Call.
 ssize_t full_write(int fd, const void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_written;
@@ -158,7 +160,7 @@ int main() {
 
     for (;;) {
 
-        printf("In attesa di nuove richieste di vaccinazioni\n");
+        printf("In attesa di nuove richieste di vaccinazione\n");
 
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {

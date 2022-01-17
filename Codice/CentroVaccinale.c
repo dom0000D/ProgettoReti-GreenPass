@@ -19,14 +19,14 @@ typedef struct {
     char ID[ID_SIZE];
 } VAX_REQUEST;
 
-//Struct contente la di inizio validità del green pass formato dai campi giorno, mese ed anno  
+//Struct contente il periodo di inizio validità del green pass formato dai campi giorno, mese ed anno
 typedef struct {
     int day;
     int month;
     int year;
 } START_DATE;
 
-//Struct contente la data della scadenza della validità del green pass formato dai campi giorno, mese ed anno
+//Struct contenente il periodo di scadenza della validità del green pass formato dai campi giorno, mese ed anno
 typedef struct {
     int day;
     int month;
@@ -40,6 +40,7 @@ typedef struct {
     EXPIRE_DATE expire_date; 
 } GP_REQUEST;
 
+//Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
 ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_read;
@@ -56,6 +57,7 @@ ssize_t full_read(int fd, void *buffer, size_t count) {
     return n_left;
 }
 
+//Scrive esattamente count byte s iterando opportunamente le scritture. Scrive anche se viene interrotta da una System Call.
 ssize_t full_write(int fd, const void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_written;
@@ -262,7 +264,7 @@ int main(int argc, char const *argv[]) {
 
     for (;;) {
 
-        printf("In attesa di nuove richieste di vaccinazioni\n");
+        printf("In attesa di nuove richieste di vaccinazione\n");
 
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {

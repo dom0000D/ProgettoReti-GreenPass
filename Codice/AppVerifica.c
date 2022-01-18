@@ -110,8 +110,9 @@ int main() {
     }
     printf("\n%s\n\n", buffer);
 
-    //printf("Convalida in corso, attendere...\n\n");
-    //sleep(3);
+    //Facciamo attendere 3 secondi per completare l'operazione di verifica
+    printf("Convalida in corso, attendere...\n\n");
+    sleep(3);
 
     //Ricezione del report
     if (full_read(socket_fd, &report, sizeof(char)) < 0) {

@@ -185,7 +185,6 @@ void answer_user(int connect_fd) {
     VAX_REQUEST package;
     EXPIRE_DATE expire_date;
     START_DATE start_date;
-    GP_REQUEST gp_request;
 
     //Scegliamo un centro vaccinale casuale
     srand(time(NULL));

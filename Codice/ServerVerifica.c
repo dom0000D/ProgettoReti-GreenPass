@@ -9,7 +9,30 @@
 #include <time.h>
 #include <netdb.h>
 #define MAX_SIZE 1024
+#define WELCOME_SIZE 108
 #define ID_SIZE 11
+#define ACK_SIZE 64
+
+//Struct contenente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
+typedef struct {
+    int day;
+    int month;
+    int year;
+} START_DATE;
+
+//Struct contente la data del giorno della scadenza della validità del green pass formato dai campi giorno, mese ed anno
+typedef struct {
+    int day;
+    int month;
+    int year;
+} EXPIRE_DATE;
+
+//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
+typedef struct {
+    char ID[ID_SIZE];
+    START_DATE start_date;
+    EXPIRE_DATE expire_date; 
+} GP_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
 ssize_t full_read(int fd, void *buffer, size_t count) {
@@ -45,11 +68,32 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
-void verify_ID(char ID[]) {
+void create_current_date(START_DATE *start_date) {
+    time_t ticks;
+    ticks = time(NULL);
+
+    //Dichiarazione strutture per la conversione della data da stringa ad intero
+    struct tm *s_date = localtime(&ticks);
+    s_date->tm_mon += 1;           //Sommiamo 1 perchè i mesi vanno da 0 ad 11
+    s_date->tm_year += 1900;       //Sommiamo 1900 perchè gli anni partono dal 122 (2022 - 1900)
+
+    //Assegnamo i valori ai parametri di ritorno
+    start_date->day = s_date->tm_mday ;
+    start_date->month = s_date->tm_mon;
+    start_date->year = s_date->tm_year;
+}
+
+char verify_ID(char ID[]) {
     int socket_fd, welcome_size, package_size;
     struct sockaddr_in server_addr;
     char buffer[MAX_SIZE], report, start_bit;
+    GP_REQUEST gp;
+    START_DATE current_date;
 
+    //Inizializziamo il report di convalida ad 1 ovvero il caso in cui un green pass sia valido
+    report = '1';
+
+    //Valorizziamo start_bit a 0 per far capire al ServerVaccinale che la comunicazione è con il ServerVerifica
     start_bit = '0';
 
     //Creazione del descrittore del socket
@@ -86,26 +130,39 @@ void verify_ID(char ID[]) {
     }
 
     //Ricezione dell'esito della verifica dal ServerVaccinale, se 0 non valido se 1 valido
-    if (full_read(socket_fd, &report, sizeof(char)) < 0) {
+    if (full_read(socket_fd, &gp, sizeof(GP_REQUEST)) < 0) {
         perror("full_read() error");
         exit(1);
     }
-    printf("Convalida in corso, attendere...\n");
-    sleep(3);
-    printf("%c\n\n", report);
-    
+
     close(socket_fd);
+
+    //Funzione per ricavare la data corrente
+    create_current_date(&current_date);
+
+    /*
+        Se l'anno corrente è maggiore dell'anno di scadenza del green pass, questo non è valido e assegnamo a report il valore di 0
+        Se l'anno della scadenza del green pass è valido MA il mese corrente è maggiore del mese di scadenza del green pass, 
+        questo non è valido e assegnamo a report il valore di 0
+        Se l'anno e il mese della scadenza del green pass è valido MA il giorno corrente è maggiore del giorno di scadenza del green 
+        pass, questo non è valido e assegnamo a report il valore di 0
+    */
+    if (current_date.year > gp.expire_date.year) report = '0';
+    if (report == '1' && current_date.month > gp.expire_date.month) report = '0';
+    if (report == '1' && current_date.day > gp.expire_date.day) report = '0';
+
+    return report;
 }
 
 //Funzione per la gestione della comunicazione con l'utente
 void receive_ID(int connect_fd) {
-    char buffer[MAX_SIZE], ID[ID_SIZE];
+    char report, buffer[MAX_SIZE], ID[ID_SIZE];
     int index, welcome_size, package_size;
 
     //Stampa un messaggo di benvenuto da inviare al clientS quando si collega ServerVerifica.
-    snprintf(buffer, MAX_SIZE, "***Benvenuto nel server di verifica***\nInserisci il numero di tessera sanitaria per testarne la validità.\n");
-    welcome_size = sizeof(buffer);
-    if(full_write(connect_fd, buffer, welcome_size) < 0) {
+    snprintf(buffer, WELCOME_SIZE, "***Benvenuto nel server di verifica***\nInserisci il numero di tessera sanitaria per testarne la validità.");
+    buffer[WELCOME_SIZE - 1] = 0;
+    if(full_write(connect_fd, buffer, WELCOME_SIZE) < 0) {
         perror("full_write() error");
         exit(1);
     }
@@ -115,17 +172,25 @@ void receive_ID(int connect_fd) {
         perror("full_read error");
         exit(1);
     }
-
-    //Funzione che invia il numero di tessera sanitaria al ServerVaccinale, riceve l'esito da questo e lo invia al clientS
-    verify_ID(ID);
     
     //Notifica all'utente la corretta ricezione dei dati che aveva inviato.
-    snprintf(buffer, MAX_SIZE, "\nIl numero di tessera sanitaria è stato correttamente ricevuto\n");
-    welcome_size = sizeof(buffer);
-    if(full_write(connect_fd, buffer, welcome_size) < 0) {
+    snprintf(buffer, ACK_SIZE, "Il numero di tessera sanitaria è stato correttamente ricevuto");
+    buffer[ACK_SIZE - 1] = 0;
+    if(full_write(connect_fd, buffer, ACK_SIZE) < 0) {
         perror("full_write() error");
         exit(1);
     }
+
+    //Funzione che invia il numero di tessera sanitaria al ServerVaccinale, riceve l'esito da questo e lo invia al clientS
+    report = verify_ID(ID);
+
+    printf("report3: %c\n", report);
+
+    //Invia il report di validità del green pass all'App di verifica
+    if (full_write(connect_fd, &report, sizeof(char)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }    
 
     close(connect_fd);
 }

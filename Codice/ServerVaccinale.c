@@ -73,29 +73,45 @@ void save_GP(GP_REQUEST gp) {
     char buffer[MAX_SIZE];
 
     //Per ogni Tessera Sanitaria crea un file contenente i dati ricevuti.
-    if ((fd = open(gp.ID, O_RDWR| O_CREAT | O_TRUNC, 0777)) < 0) {
-        perror("fopen() error");
+    if ((fd = open(gp.ID, O_WRONLY| O_CREAT | O_TRUNC, 0777)) < 0) {
+        perror("open() error");
         exit(1);
     }
-    snprintf(buffer, MAX_SIZE, "%02d:%02d:%02d\n", gp.start_date.day, gp.start_date.month, gp.start_date.year);
-    write(fd, buffer, strlen(buffer));
-    snprintf(buffer, MAX_SIZE, "%02d:%02d:%02d\n", gp.expire_date.day, gp.expire_date.month, gp.expire_date.year);
-    write(fd, buffer, strlen(buffer));
+    //Andiamo a scrivere i campi di GP nel file binario con nome il numero di tessera sanitaria del green pass
+    if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+        perror("write() error");
+        exit(1);
+    } 
+
+    close(fd);
 }
 
 void SV_comunication(int connect_fd) {
     char ID[ID_SIZE], report = '1';
+    int fd;
+    GP_REQUEST gp;
 
     //Riceve il numero di tessera sanitaria dal ServerVerifica
     if (full_read(connect_fd, ID, ID_SIZE) < 0) {
         perror("full_read() error");
         exit(1);
     }
-    if (full_write(connect_fd, &report, sizeof(char)) < 0) {
+    
+    if (((fd = open(ID, O_RDONLY, 0777))) < 0) {
+        perror("open() error");
+        exit(1);
+    }
+    if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+        perror("read() error");
+        exit(1);
+    }
+    close(fd);
+
+    //Mandiamo il green pass richiesto al ServerVerifica che controllerà la sua validità
+    if(full_write(connect_fd, &gp, sizeof(GP_REQUEST)) < 0) {
         perror("full_write() error");
         exit(1);
     }
-
 }
 
 void CV_comunication(int connect_fd) {
@@ -176,7 +192,6 @@ int main() {
                 perror("full_read() error");
                 exit(1);
             }
-            printf("start bit: %c\n", start_bit);
             if (start_bit == '1') CV_comunication(connect_fd);
             else if (start_bit == '0') SV_comunication(connect_fd);
             else printf("Client non riconosciuto\n");

@@ -109,9 +109,8 @@ int main() {
         exit(1);
     }
     printf("\n%s\n\n", buffer);
-
-    //printf("Convalida in corso, attendere...\n\n");
-    //sleep(3);
+    printf("Convalida in corso, attendere...\n\n");
+    sleep(3);
 
     //Ricezione del report
     if (full_read(socket_fd, &report, sizeof(char)) < 0) {

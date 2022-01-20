@@ -13,25 +13,18 @@
 #define ID_SIZE 11
 #define ACK_SIZE 64
 
-//Struct contenente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
+//Struct che permette di salvare una data, formata dai campi: giorno, mese ed anno
 typedef struct {
     int day;
     int month;
     int year;
-} START_DATE;
-
-//Struct contente la data del giorno della scadenza della validità del green pass formato dai campi giorno, mese ed anno
-typedef struct {
-    int day;
-    int month;
-    int year;
-} EXPIRE_DATE;
+} DATE;
 
 //Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
 typedef struct {
     char ID[ID_SIZE];
-    START_DATE start_date;
-    EXPIRE_DATE expire_date; 
+    DATE start_date;
+    DATE expire_date; 
 } GP_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -68,7 +61,7 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
-void create_current_date(START_DATE *start_date) {
+void create_current_date(DATE *start_date) {
     time_t ticks;
     ticks = time(NULL);
 
@@ -88,7 +81,7 @@ char verify_ID(char ID[]) {
     struct sockaddr_in server_addr;
     char buffer[MAX_SIZE], report, start_bit;
     GP_REQUEST gp;
-    START_DATE current_date;
+    DATE current_date;
 
     //Inizializziamo il report di convalida ad 1 ovvero il caso in cui un green pass sia valido
     report = '1';
@@ -118,6 +111,7 @@ char verify_ID(char ID[]) {
         exit(1);
     }
 
+    //Invia un bit di valore 0 al ServerVaccinale per informarlo che la comunicazione deve avvenire con il ServerVerifica
     if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
         perror("full_write() error");
         exit(1);
@@ -183,8 +177,6 @@ void receive_ID(int connect_fd) {
 
     //Funzione che invia il numero di tessera sanitaria al ServerVaccinale, riceve l'esito da questo e lo invia al clientS
     report = verify_ID(ID);
-
-    printf("report3: %c\n", report);
 
     //Invia il report di validità del green pass all'App di verifica
     if (full_write(connect_fd, &report, sizeof(char)) < 0) {

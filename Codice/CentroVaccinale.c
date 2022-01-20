@@ -19,25 +19,18 @@ typedef struct {
     char ID[ID_SIZE];
 } VAX_REQUEST;
 
-//Struct contente il periodo di inizio validità del green pass formato dai campi giorno, mese ed anno
+//Struct che permette di salvare una data, formata dai campi: giorno, mese ed anno
 typedef struct {
     int day;
     int month;
     int year;
-} START_DATE;
-
-//Struct contenente il periodo di scadenza della validità del green pass formato dai campi giorno, mese ed anno
-typedef struct {
-    int day;
-    int month;
-    int year;
-} EXPIRE_DATE;
+} DATE;
 
 //Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
 typedef struct {
     char ID[ID_SIZE];
-    START_DATE start_date;
-    EXPIRE_DATE expire_date; 
+    DATE start_date;
+    DATE expire_date; 
 } GP_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -75,7 +68,7 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
 }
 
 //Funzione per calcolare la data di scadenza e la data di inizio validità del green pass
-void create_expire_date(EXPIRE_DATE *expire_date) {
+void create_expire_date(DATE *expire_date) {
     time_t ticks;
     ticks = time(NULL);
     
@@ -106,7 +99,7 @@ void create_expire_date(EXPIRE_DATE *expire_date) {
     expire_date->year = e_date->tm_year;
 }
 
-void create_start_date(START_DATE *start_date) {
+void create_start_date(DATE *start_date) {
     time_t ticks;
     ticks = time(NULL);
 
@@ -123,7 +116,7 @@ void create_start_date(START_DATE *start_date) {
     start_date->year = s_date->tm_year;
 }
 
-void send_GP(char ID[], START_DATE start_date, EXPIRE_DATE expire_date) {
+void send_GP(GP_REQUEST gp) {
     int socket_fd;
     struct sockaddr_in server_addr;
     char start_bit, buffer[MAX_SIZE];
@@ -158,18 +151,8 @@ void send_GP(char ID[], START_DATE start_date, EXPIRE_DATE expire_date) {
         exit(1);
     }
 
-    //Invia il numero di tessera saniraria al ServerVaccinale
-    if (full_write(socket_fd, ID, ID_SIZE) < 0) {
-        perror("full_write() error");
-        exit(1);
-    }
-    //Invia il giorno di inizio validità del GreenPass al ServerVaccinale
-    if (full_write(socket_fd, &start_date, sizeof(start_date)) < 0) {
-        perror("full_write() error");
-        exit(1);
-    }
-    //Invia il giorno di scadenza del GreenPass al ServerVaccinale
-    if (full_write(socket_fd, &expire_date, sizeof(expire_date)) < 0) {
+    //Inviamo il green pass al ServerVaccinale
+    if (full_write(socket_fd, &gp, sizeof(gp)) < 0) {
         perror("full_write() error");
         exit(1);
     }
@@ -183,8 +166,7 @@ void answer_user(int connect_fd) {
     char buffer[MAX_SIZE];
     int index, welcome_size, package_size;
     VAX_REQUEST package;
-    EXPIRE_DATE expire_date;
-    START_DATE start_date;
+    GP_REQUEST gp;
 
     //Scegliamo un centro vaccinale casuale
     srand(time(NULL));
@@ -220,16 +202,17 @@ void answer_user(int connect_fd) {
         exit(1);
     }
 
+    //Copio il numero di tessera sanitaria inviatoci dall'utente nel green pass da inviare al ServerVaccinale
+    strcpy(gp.ID, package.ID);
     //Si ottiene la data di inizo validità del Green Pass
-    create_start_date(&start_date);
-
+    create_start_date(&gp.start_date);
     //Crea la data di scadenza (3 mesi)
-    create_expire_date(&expire_date); 
+    create_expire_date(&gp.expire_date); 
     
     close(connect_fd);
 
     //Funzione per mandare il nuovo Green Pass al CentroVaccinale
-    send_GP(package.ID, start_date, expire_date);
+    send_GP(gp);
 }
 
 int main(int argc, char const *argv[]) {

@@ -11,25 +11,18 @@
 #define MAX_SIZE 2048
 #define ID_SIZE 11
 
-//Struct contenente la data del giorno di inizio validità del green pass formato dai campi giorno, mese ed anno
+//Struct che permette di salvare una data, formata dai campi: giorno, mese ed anno
 typedef struct {
     int day;
     int month;
     int year;
-} START_DATE;
-
-//Struct contente la data del giorno della scadenza della validità del green pass formato dai campi giorno, mese ed anno
-typedef struct {
-    int day;
-    int month;
-    int year;
-} EXPIRE_DATE;
+} DATE;
 
 //Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
 typedef struct {
     char ID[ID_SIZE];
-    START_DATE start_date;
-    EXPIRE_DATE expire_date; 
+    DATE start_date;
+    DATE expire_date; 
 } GP_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -66,26 +59,10 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
-//Funzione che salva i dati ricevuti dal centro vaccinale in un filesystem.
-void save_GP(GP_REQUEST gp) {
-    int fd;
-    GP_REQUEST temp;
-    char buffer[MAX_SIZE];
-
-    //Per ogni Tessera Sanitaria crea un file contenente i dati ricevuti.
-    if ((fd = open(gp.ID, O_WRONLY| O_CREAT | O_TRUNC, 0777)) < 0) {
-        perror("open() error");
-        exit(1);
-    }
-    //Andiamo a scrivere i campi di GP nel file binario con nome il numero di tessera sanitaria del green pass
-    if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
-        perror("write() error");
-        exit(1);
-    } 
-
-    close(fd);
-}
-
+/*
+    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass nel file system relativo al numero di tessera 
+    sanitaria ricevuto e lo invia al ServerVerifica.
+*/
 void SV_comunication(int connect_fd) {
     char ID[ID_SIZE], report = '1';
     int fd;
@@ -114,24 +91,32 @@ void SV_comunication(int connect_fd) {
     }
 }
 
+//Funzione che tratta la conunicazione con il CentroVaccinale e salva i dati ricevuti da questo in un filesystem.
 void CV_comunication(int connect_fd) {
     GP_REQUEST gp;
 
-    if (full_read(connect_fd, gp.ID, ID_SIZE) < 0) {
+    //Ricevo il green pass dal CentroVaccinale
+    if (full_read(connect_fd, &gp, sizeof(GP_REQUEST)) < 0) {
         perror("full_write() error");
         exit(1);
     }
-    if (full_read(connect_fd, &gp.start_date, sizeof(START_DATE)) < 0) {
-        perror("full_write() error");
-        exit(1);
-    }
-    if (full_read(connect_fd, &gp.expire_date, sizeof(EXPIRE_DATE)) < 0) {
-        perror("full_write() error");
-        exit(1);
-    }
-    printf("Nuovo green pass ricevuto\n");
 
-    save_GP(gp);
+    int fd;
+    GP_REQUEST temp;
+    char buffer[MAX_SIZE];
+
+    //Per ogni Tessera Sanitaria crea un file contenente i dati ricevuti.
+    if ((fd = open(gp.ID, O_WRONLY| O_CREAT | O_TRUNC, 0777)) < 0) {
+        perror("open() error");
+        exit(1);
+    }
+    //Andiamo a scrivere i campi di GP nel file binario con nome il numero di tessera sanitaria del green pass
+    if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+        perror("write() error");
+        exit(1);
+    } 
+
+    close(fd);
 }
 
 int main() {

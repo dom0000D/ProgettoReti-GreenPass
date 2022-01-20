@@ -178,6 +178,7 @@ void receive_ID(int connect_fd) {
     //Funzione che invia il numero di tessera sanitaria al ServerVaccinale, riceve l'esito da questo e lo invia al clientS
     report = verify_ID(ID);
 
+
     //Invia il report di validità del green pass all'App di verifica
     if (full_write(connect_fd, &report, sizeof(char)) < 0) {
         perror("full_write() error");

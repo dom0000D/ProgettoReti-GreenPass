@@ -109,6 +109,8 @@ int main() {
         exit(1);
     }
     printf("\n%s\n\n", buffer);
+
+    //Facciamo attendere 3 secondi per completare l'operazione di verifica
     printf("Convalida in corso, attendere...\n\n");
     sleep(3);
 

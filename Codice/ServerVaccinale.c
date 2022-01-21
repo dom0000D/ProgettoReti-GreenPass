@@ -8,9 +8,20 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <time.h>
+#include <signal.h>
 #define MAX_SIZE 2048
 #define ID_SIZE 11
 
+//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
+void handler (int sign){
+if (sign==SIGINT) {
+  printf("\nUscita in corso...\n");
+  sleep (2);
+  printf("***Grazie per aver utilizzato il nostro servizio***\n");
+
+  exit(0);
+  }
+}
 //Struct che permette di salvare una data, formata dai campi: giorno, mese ed anno
 typedef struct {
     int day;
@@ -18,11 +29,11 @@ typedef struct {
     int year;
 } DATE;
 
-//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
+//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP
 typedef struct {
     char ID[ID_SIZE];
     DATE start_date;
-    DATE expire_date; 
+    DATE expire_date;
 } GP_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -60,7 +71,7 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
 }
 
 /*
-    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass nel file system relativo al numero di tessera 
+    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass nel file system relativo al numero di tessera
     sanitaria ricevuto e lo invia al ServerVerifica.
 */
 void SV_comunication(int connect_fd) {
@@ -73,7 +84,7 @@ void SV_comunication(int connect_fd) {
         perror("full_read() error");
         exit(1);
     }
-    
+
     if (((fd = open(ID, O_RDONLY, 0777))) < 0) {
         perror("open() error");
         exit(1);
@@ -114,7 +125,7 @@ void CV_comunication(int connect_fd) {
     if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
         perror("write() error");
         exit(1);
-    } 
+    }
 
     close(fd);
 }
@@ -124,7 +135,7 @@ int main() {
     struct sockaddr_in serv_addr;
     pid_t pid;
     char start_bit;
-
+    signal(SIGINT,handler); //Cattura il segnale CTRL-C
     //Creazione descrizione del socket
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("socket() error");
@@ -169,7 +180,7 @@ int main() {
             close(listen_fd);
 
             /*
-                Il ServerVaccinale riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome due connessioni differenti. 
+                Il ServerVaccinale riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome due connessioni differenti.
                 Quando riceve come bit 1 allora il figlio gestirà la connessione con il CentroVaccinale.
                 Quando riceve come bit 0 allora il figlio gestirà la connessione con il ServerVerifica.
             */
@@ -187,4 +198,3 @@ int main() {
     }
     exit(0);
 }
-

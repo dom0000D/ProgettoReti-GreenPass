@@ -8,10 +8,21 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <netdb.h>
+#include <signal.h>
 #define MAX_SIZE 1024
 #define ID_SIZE 11
 #define ACK_SIZE 61
 
+//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
+void handler (int sign){
+if (sign==SIGINT) {
+  printf("\nUscita in corso...\n");
+  sleep (2);
+  printf("***Grazie per aver utilizzato il nostro servizio***\n");
+
+  exit(0);
+  }
+}
 //Struct del pacchetto che il centro vaccinale deve ricevere dall'utente contentente nome, cognome e numero di tessera sanitaria dell'utente
 typedef struct {
     char name[MAX_SIZE];
@@ -26,11 +37,11 @@ typedef struct {
     int year;
 } DATE;
 
-//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
+//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP
 typedef struct {
     char ID[ID_SIZE];
     DATE start_date;
-    DATE expire_date; 
+    DATE expire_date;
 } GP_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -71,12 +82,12 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
 void create_expire_date(DATE *expire_date) {
     time_t ticks;
     ticks = time(NULL);
-    
+
     //Dichiarazione strutture per la conversione della data da stringa ad intero
     struct tm *e_date = localtime(&ticks);
     e_date->tm_mon += 4;           //Sommiamo 4 perchè i mesi vanno da 0 ad 11
     e_date->tm_year += 1900;       //Sommiamo 1900 perchè gli anni partono dal 122 (2022 - 1900)
-    
+
     //Effettuiamo il controllo nel caso in cui il vaccino sia stato fatto nel mese di ottobre, novembre o dicembre, comportando un aumento dell'anno
     if (e_date->tm_mon == 13) { //if 13 è ottobre quindi si incrementano 3 mesi, arrivando a gennaio dell'anno successivo
         e_date->tm_mon = 1;
@@ -92,7 +103,7 @@ void create_expire_date(DATE *expire_date) {
     }
 
     printf("La data di scadenza del green pass e': %02d:%02d:%02d\n", e_date->tm_mday, e_date->tm_mon, e_date->tm_year);
-    
+
     //Assegnamo i valori ai parametri di ritorno
     expire_date->day = e_date->tm_mday ;
     expire_date->month = e_date->tm_mon;
@@ -171,7 +182,7 @@ void answer_user(int connect_fd) {
     //Scegliamo un centro vaccinale casuale
     srand(time(NULL));
     index = rand() % 10;
-    
+
     //Stampa un messaggo di benvenuto da inviare all'utente quando si collega al centro vaccinale.
     snprintf(buffer, MAX_SIZE, "***Benvenuto nel centro vaccinale di %s***\nInserisci nome, cognome e numero di tessera sanitaria per inserirli sulla piattaforma.\n", hub_name[index]);
     welcome_size = sizeof(buffer);
@@ -207,8 +218,8 @@ void answer_user(int connect_fd) {
     //Si ottiene la data di inizo validità del Green Pass
     create_start_date(&gp.start_date);
     //Crea la data di scadenza (3 mesi)
-    create_expire_date(&gp.expire_date); 
-    
+    create_expire_date(&gp.expire_date);
+
     close(connect_fd);
 
     //Funzione per mandare il nuovo Green Pass al CentroVaccinale
@@ -220,7 +231,7 @@ int main(int argc, char const *argv[]) {
     VAX_REQUEST package;
     struct sockaddr_in serv_addr;
     pid_t pid;
-
+    signal(SIGINT,handler); //Cattura il segnale CTRL-C
     //Creazione descrizione del socket
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("socket() error");
@@ -263,9 +274,9 @@ int main(int argc, char const *argv[]) {
         if (pid == 0) {
             close(listen_fd);
 
-            //Riceve informazioni dall'utente 
+            //Riceve informazioni dall'utente
             answer_user(connect_fd);
-          
+
             close(connect_fd);
             exit(0);
         } else close(connect_fd);

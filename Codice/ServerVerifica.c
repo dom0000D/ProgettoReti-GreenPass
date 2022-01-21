@@ -8,10 +8,22 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <netdb.h>
+#include <signal.h>
 #define MAX_SIZE 1024
 #define WELCOME_SIZE 108
 #define ID_SIZE 11
 #define ACK_SIZE 64
+
+//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
+void handler (int sign){
+if (sign==SIGINT) {
+  printf("\nUscita in corso...\n");
+  sleep (2);
+  printf("***Grazie per aver utilizzato il nostro servizio di verifica GP***\n");
+
+  exit(0);
+  }
+}
 
 //Struct che permette di salvare una data, formata dai campi: giorno, mese ed anno
 typedef struct {
@@ -20,11 +32,11 @@ typedef struct {
     int year;
 } DATE;
 
-//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP 
+//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP
 typedef struct {
     char ID[ID_SIZE];
     DATE start_date;
-    DATE expire_date; 
+    DATE expire_date;
 } GP_REQUEST;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -136,9 +148,9 @@ char verify_ID(char ID[]) {
 
     /*
         Se l'anno corrente è maggiore dell'anno di scadenza del green pass, questo non è valido e assegnamo a report il valore di 0
-        Se l'anno della scadenza del green pass è valido MA il mese corrente è maggiore del mese di scadenza del green pass, 
+        Se l'anno della scadenza del green pass è valido MA il mese corrente è maggiore del mese di scadenza del green pass,
         questo non è valido e assegnamo a report il valore di 0
-        Se l'anno e il mese della scadenza del green pass è valido MA il giorno corrente è maggiore del giorno di scadenza del green 
+        Se l'anno e il mese della scadenza del green pass è valido MA il giorno corrente è maggiore del giorno di scadenza del green
         pass, questo non è valido e assegnamo a report il valore di 0
     */
     if (current_date.year > gp.expire_date.year) report = '0';
@@ -166,7 +178,7 @@ void receive_ID(int connect_fd) {
         perror("full_read error");
         exit(1);
     }
-    
+
     //Notifica all'utente la corretta ricezione dei dati che aveva inviato.
     snprintf(buffer, ACK_SIZE, "Il numero di tessera sanitaria è stato correttamente ricevuto");
     buffer[ACK_SIZE - 1] = 0;
@@ -183,7 +195,7 @@ void receive_ID(int connect_fd) {
     if (full_write(connect_fd, &report, sizeof(char)) < 0) {
         perror("full_write() error");
         exit(1);
-    }    
+    }
 
     close(connect_fd);
 }
@@ -192,7 +204,7 @@ int main() {
     int listen_fd, connect_fd;
     struct sockaddr_in serv_addr;
     pid_t pid;
-
+    signal(SIGINT,handler); //Cattura il segnale CTRL-C
     //Creazione descrizione del socket
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("socket() error");
@@ -218,7 +230,7 @@ int main() {
 
     for (;;) {
 
-        printf("In attesa di nuove richieste di vaccinazione\n");
+        printf("In attesa di Green Pass da scansionare\n");
 
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {
@@ -235,9 +247,9 @@ int main() {
         if (pid == 0) {
             close(listen_fd);
 
-            //Riceve informazioni dall'utente 
+            //Riceve informazioni dall'utente
             receive_ID(connect_fd);
-          
+
             close(connect_fd);
             exit(0);
         } else close(connect_fd);

@@ -870,40 +870,6 @@
 										},
 										{
 											"_type": "UMLAttributeView",
-											"_id": "AAAAAAF+KdzntWvohGA=",
-											"_parent": {
-												"$ref": "AAAAAAF+KdxQ8Ws/7g4="
-											},
-											"model": {
-												"$ref": "AAAAAAF+Kdznq2viUr0="
-											},
-											"font": "Arial;13;0",
-											"left": 389,
-											"top": 347,
-											"width": 247,
-											"height": 13,
-											"text": "+Num. Dose: String",
-											"horizontalAlignment": 0
-										},
-										{
-											"_type": "UMLAttributeView",
-											"_id": "AAAAAAF+Kd0CIWwEls0=",
-											"_parent": {
-												"$ref": "AAAAAAF+KdxQ8Ws/7g4="
-											},
-											"model": {
-												"$ref": "AAAAAAF+Kd0CFmv+EQs="
-											},
-											"font": "Arial;13;0",
-											"left": 389,
-											"top": 362,
-											"width": 247,
-											"height": 13,
-											"text": "+Tipo Vaccino: String",
-											"horizontalAlignment": 0
-										},
-										{
-											"_type": "UMLAttributeView",
 											"_id": "AAAAAAF+Kd2Bt2xXQq4=",
 											"_parent": {
 												"$ref": "AAAAAAF+KdxQ8Ws/7g4="
@@ -913,7 +879,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 389,
-											"top": 377,
+											"top": 347,
 											"width": 247,
 											"height": 13,
 											"text": "+Conferma: String",
@@ -924,7 +890,7 @@
 									"left": 384,
 									"top": 297,
 									"width": 257,
-									"height": 98
+									"height": 68
 								},
 								{
 									"_type": "UMLOperationCompartmentView",
@@ -937,7 +903,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 384,
-									"top": 395,
+									"top": 365,
 									"width": 257,
 									"height": 10
 								},
@@ -4200,8 +4166,8 @@
 							"left": 1440,
 							"top": 872,
 							"width": 360,
-							"height": 105,
-							"text": "Il server V, dopo aver ricevuto la tessera sanitaria dal server G, compara la tessera e la data e invia la risposta al server G. Il server G a sua volta invierà l'esito al client S."
+							"height": 57,
+							"text": "Il ServerG richiede al ServerV un numero di tessera sanitaria: se esiste, il ServerV la invia, se non esiste lo notificherà."
 						},
 						{
 							"_type": "FreelineEdgeView",
@@ -4413,24 +4379,6 @@
 								"$ref": "AAAAAAF+KdxQ8Ws3AC0="
 							},
 							"name": "Centro Vaccinale",
-							"type": "String"
-						},
-						{
-							"_type": "UMLAttribute",
-							"_id": "AAAAAAF+Kdznq2viUr0=",
-							"_parent": {
-								"$ref": "AAAAAAF+KdxQ8Ws3AC0="
-							},
-							"name": "Num. Dose",
-							"type": "String"
-						},
-						{
-							"_type": "UMLAttribute",
-							"_id": "AAAAAAF+Kd0CFmv+EQs=",
-							"_parent": {
-								"$ref": "AAAAAAF+KdxQ8Ws3AC0="
-							},
-							"name": "Tipo Vaccino",
 							"type": "String"
 						},
 						{

@@ -154,8 +154,8 @@ void SV_comunication(int connect_fd) {
 
     /*
         Il ServerVaccinale riceve un bit dal ServerVerifica, che può avere valore 0 o 1, siccome sono due funzioni differenti.
-        Quando riceve come bit 1 allora il ServerVaccinale gestirà la funzione per modificare il report di un green pass.
-        Quando riceve come bit 0 allora il ServerVaccinale gestirà la funzione per inviare un green pass al ServerVerifica.
+        Quando riceve come bit 0 allora il ServerVaccinale gestirà la funzione per modificare il report di un green pass.
+        Quando riceve come bit 1 allora il ServerVaccinale gestirà la funzione per inviare un green pass al ServerVerifica.
     */
     if (full_read(connect_fd, &start_bit, sizeof(char)) < 0) {
         perror("full_read() error");

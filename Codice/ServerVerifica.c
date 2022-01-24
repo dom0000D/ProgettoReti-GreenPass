@@ -138,7 +138,7 @@ char verify_ID(char ID[]) {
 
     start_bit = '1';
 
-    //Invia un bit di valore 0 al ServerVaccinale per informarlo che deve verificare il green pass
+    //Invia un bit di valore 1 al ServerVaccinale per informarlo che deve verificare il green pass
     if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
         perror("full_write() error");
         exit(1);
@@ -244,13 +244,13 @@ void send_report(REPORT package) {
         exit(1);
     }
 
-    //Invia un bit di valore 1 al ServerVaccinale per informarlo che deve comunicare con il ServerVaccinale
+    //Invia un bit di valore 0 al ServerVaccinale per informarlo che deve comunicare con il ServerVaccinale
     if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
         perror("full_write() error");
         exit(1);
     }
 
-    //Invia un bit di valore 1 al ServerVaccinale per informarlo che deve modificare il report del green pass
+    //Invia un bit di valore 0 al ServerVaccinale per informarlo che deve modificare il report del green pass
     if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
         perror("full_write() error");
         exit(1);

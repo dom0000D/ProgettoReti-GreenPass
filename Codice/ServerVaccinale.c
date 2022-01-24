@@ -22,6 +22,13 @@ if (sign==SIGINT) {
   exit(0);
   }
 }
+
+//Struct del pacchetto dell'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
+typedef struct  {
+    char ID[ID_SIZE];
+    char report;
+} REPORT;
+
 //Struct che permette di salvare una data, formata dai campi: giorno, mese ed anno
 typedef struct {
     int day;
@@ -32,6 +39,7 @@ typedef struct {
 //Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP
 typedef struct {
     char ID[ID_SIZE];
+    char report; //0 green pass non valido, 1 green pass valido
     DATE start_date;
     DATE expire_date;
 } GP_REQUEST;
@@ -70,12 +78,8 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
-/*
-    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass nel file system relativo al numero di tessera
-    sanitaria ricevuto e lo invia al ServerVerifica.
-*/
-void SV_comunication(int connect_fd) {
-    char ID[ID_SIZE], report = '1';
+void send_gp(int connect_fd) {
+    char report, ID[ID_SIZE];
     int fd;
     GP_REQUEST gp;
 
@@ -85,7 +89,7 @@ void SV_comunication(int connect_fd) {
         exit(1);
     }
 
-    if (((fd = open(ID, O_RDONLY, 0777))) < 0) {
+    if ((fd = open(ID, O_RDONLY, 0777)) < 0) {
         perror("open() error");
         exit(1);
     }
@@ -102,8 +106,69 @@ void SV_comunication(int connect_fd) {
     }
 }
 
+void modify_report(int connect_fd) {
+    REPORT package;
+    GP_REQUEST gp;
+    int fd;
+
+    //Riceve il pacchetto dal ServerVerifica proveniente dall'ASL contenente numero di tessera sanitaria ed il referto del tampone
+    if (full_read(connect_fd, &package, sizeof(REPORT)) < 0) {
+        perror("full_read() error");
+        exit(1);
+    }
+
+    //Apre il file contenente il green pass relativo al numero di tessera ricevuto dall'ASL
+    if ((fd = open(package.ID, O_RDWR , 0777)) < 0) {
+        perror("open() error");
+        exit(1);
+    }
+
+    //Legge il file aperto contenente il green pass relativo al numero di tessera ricevuto dall'ASL
+    if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+        perror("read() error");
+        exit(1);
+    }
+
+    //Assegna il referto ricevuto dall'ASL al green pass
+    gp.report = package.report;
+
+    //Ci posizioniamo all'inizio dello stream del file
+    lseek(fd, 0, SEEK_SET);
+
+    //Andiamo a sovrascrivere i campi di GP nel file binario con nome il numero di tessera sanitaria del green pass
+    if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+        perror("write() error");
+        exit(1);
+    }    
+}
+
+
+/*
+    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass nel file system relativo al numero di tessera
+    sanitaria ricevuto e lo invia al ServerVerifica.
+*/
+void SV_comunication(int connect_fd) {
+    char start_bit, 
+
+    report = '1';
+
+    /*
+        Il ServerVaccinale riceve un bit dal ServerVerifica, che può avere valore 0 o 1, siccome sono due funzioni differenti.
+        Quando riceve come bit 1 allora il ServerVaccinale gestirà la funzione per modificare il report di un green pass.
+        Quando riceve come bit 0 allora il ServerVaccinale gestirà la funzione per inviare un green pass al ServerVerifica.
+    */
+    if (full_read(connect_fd, &start_bit, sizeof(char)) < 0) {
+        perror("full_read() error");
+        exit(1);
+    }
+    if (start_bit == '0') modify_report(connect_fd);
+    else if (start_bit == '1') send_gp(connect_fd);
+    else printf("Dato non valido\n\n");
+}
+
 //Funzione che tratta la conunicazione con il CentroVaccinale e salva i dati ricevuti da questo in un filesystem.
 void CV_comunication(int connect_fd) {
+    int fd;
     GP_REQUEST gp;
 
     //Ricevo il green pass dal CentroVaccinale
@@ -112,9 +177,8 @@ void CV_comunication(int connect_fd) {
         exit(1);
     }
 
-    int fd;
-    GP_REQUEST temp;
-    char buffer[MAX_SIZE];
+    //Quando viene generato un nuovo green pass è valido di defualt
+    gp.report = '1';
 
     //Per ogni Tessera Sanitaria crea un file contenente i dati ricevuti.
     if ((fd = open(gp.ID, O_WRONLY| O_CREAT | O_TRUNC, 0777)) < 0) {
@@ -161,7 +225,7 @@ int main() {
 
     for (;;) {
 
-        printf("In attesa di nuovi dati\n");
+        printf("In attesa di nuovi dati\n\n");
 
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {
@@ -190,7 +254,7 @@ int main() {
             }
             if (start_bit == '1') CV_comunication(connect_fd);
             else if (start_bit == '0') SV_comunication(connect_fd);
-            else printf("Client non riconosciuto\n");
+            else printf("Client non riconosciuto\n\n");
 
             close(connect_fd);
             exit(0);

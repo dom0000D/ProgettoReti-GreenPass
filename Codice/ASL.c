@@ -8,9 +8,14 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #define MAX_SIZE 1024
-#define ACK_SIZE 64
-#define WELCOME_SIZE 108
-#define ID_SIZE 11 //10 byte per la tessera sanitaria più un byte per il terminatore
+#define ID_SIZE 11
+#define ACK_SIZE 61
+
+//Struct del pacchetto dell'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
+typedef struct  {
+    char ID[ID_SIZE];
+    char report;
+} REPORT;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
 ssize_t full_read(int fd, void *buffer, size_t count) {
@@ -47,12 +52,13 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
-int main() {
+int main(int argc, char **argv) {
     int socket_fd;
     struct sockaddr_in server_addr;
-    char start_bit, report, buffer[MAX_SIZE], ID[ID_SIZE];
+    REPORT package;
+    char start_bit, buffer[MAX_SIZE];
 
-    start_bit = '0';
+    start_bit = '1';
 
     //Creazione del descrittore del socket
     if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -76,20 +82,15 @@ int main() {
         exit(1);
     }
 
-    //Invia un bit di valore 0 al ServerVerifica per informarlo che la comunicazione deve avvenire con l'AppVerifica
+    //Invia un bit di valore 1 al ServerVerifica per informarlo che la comunicazione deve avvenire con l'ASL
     if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
         perror("full_write() error");
         exit(1);
     }
 
-    //Riceve il benevenuto dal ServerVerifica
-    if (full_read(socket_fd, buffer, WELCOME_SIZE) < 0) {
-        perror("full_read() error");
-        exit(1);
-    }
-    printf("%s\n\n", buffer);
-
-//Inserimento codice tessera sanitaria
+    printf("*** ASL ***\n");
+    printf("Immettere numero di tessera sanitaria ed il referto di un tampone per invalidare o ripristinare un green pass\n");
+    //Inserimento codice tessera sanitaria
     while (1) {
         printf("Inserisci codice tessera sanitaria [Massimo 10 caratteri]: ");
         if (fgets(buffer, MAX_SIZE, stdin) == NULL) {
@@ -98,40 +99,25 @@ int main() {
         }
         if (strlen(buffer) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
-            strcpy(ID, buffer); 
+            strcpy(package.ID, buffer); 
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-            ID[ID_SIZE - 1] = 0;  
+            package.ID[ID_SIZE - 1] = 0;  
             break;
         }
     }
 
-    //Invio del numero di tessera sanitaria da convalidare al server verifica
-    if (full_write(socket_fd, ID, ID_SIZE)) {
+    while (1) {
+        printf("Inserire 0 per green pass non valido, 1 per green pass valido: ");
+        scanf("%c", &package.report);
+        if (package.report == '1' || package.report == '0') break;
+        printf("Errore: input errato, riprovare...\n\n");
+    }
+
+    //Invia pacchetto report al ServerVerifica
+    if (full_write(socket_fd, &package, sizeof(REPORT)) < 0) {
         perror("full_write() error");
         exit(1);
     }
-
-    //Ricezione dell'ack
-    if (full_read(socket_fd, buffer, ACK_SIZE) < 0) {
-        perror("full_read() error");
-        exit(1);
-    }
-    printf("\n%s\n\n", buffer);
-
-    //Facciamo attendere 3 secondi per completare l'operazione di verifica
-    printf("Convalida in corso, attendere...\n\n");
-    sleep(3);
-
-    //Ricezione del report
-    if (full_read(socket_fd, &report, sizeof(char)) < 0) {
-        perror("full_read() error");
-        exit(1);
-    }
-
-    if (report == '0') printf("Green Pass non valido\n");
-    if (report == '1') printf("Green Pass Valido\n");
-
-    close(socket_fd);
 
     exit(0);
 }

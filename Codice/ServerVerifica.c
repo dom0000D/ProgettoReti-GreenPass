@@ -35,9 +35,16 @@ typedef struct {
 //Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP
 typedef struct {
     char ID[ID_SIZE];
+    char report;
     DATE start_date;
     DATE expire_date;
 } GP_REQUEST;
+
+//Struct del pacchetto inviato dall'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
+typedef struct  {
+    char ID[ID_SIZE];
+    char report;
+} REPORT;
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
 ssize_t full_read(int fd, void *buffer, size_t count) {
@@ -129,6 +136,14 @@ char verify_ID(char ID[]) {
         exit(1);
     }
 
+    start_bit = '1';
+
+    //Invia un bit di valore 0 al ServerVaccinale per informarlo che deve verificare il green pass
+    if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+
     //Invia il numero di tessera sanitaria ricevuto dall'AppVerifica al SeverVaccinale
     if (full_write(socket_fd, ID, ID_SIZE)) {
         perror("full_write() error");
@@ -156,6 +171,7 @@ char verify_ID(char ID[]) {
     if (current_date.year > gp.expire_date.year) report = '0';
     if (report == '1' && current_date.month > gp.expire_date.month) report = '0';
     if (report == '1' && current_date.day > gp.expire_date.day) report = '0';
+    if (report == '1' && gp.report == '0') report = '0';
 
     return report;
 }
@@ -190,7 +206,6 @@ void receive_ID(int connect_fd) {
     //Funzione che invia il numero di tessera sanitaria al ServerVaccinale, riceve l'esito da questo e lo invia al clientS
     report = verify_ID(ID);
 
-
     //Invia il report di validità del green pass all'App di verifica
     if (full_write(connect_fd, &report, sizeof(char)) < 0) {
         perror("full_write() error");
@@ -200,10 +215,74 @@ void receive_ID(int connect_fd) {
     close(connect_fd);
 }
 
+void send_report(REPORT package) {
+    int socket_fd;
+    struct sockaddr_in server_addr;
+    char start_bit, buffer[MAX_SIZE];
+
+    start_bit = '0';
+
+    //Creazione del descrittore del socket
+    if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("socket() error");
+        exit(1);
+    }
+
+    //Valorizzazione struttura
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(1025);
+
+    //Conversione dell'indirizzo IP dal formato dotted decimal a stringa di bit
+    if (inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr) <= 0) {
+        perror("inet_pton() error");
+        exit(1);
+    }
+
+    //Effettua connessione con il server
+    if (connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("connect() error");
+        exit(1);
+    }
+
+    //Invia un bit di valore 1 al ServerVaccinale per informarlo che deve comunicare con il ServerVaccinale
+    if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+
+    //Invia un bit di valore 1 al ServerVaccinale per informarlo che deve modificare il report del green pass
+    if (full_write(socket_fd, &start_bit, sizeof(char)) < 0) {
+        perror("full_write() error");
+        exit(1);
+    }
+
+    //Invia il pacchetto appena ricevuto dall'ASL al ServerVaccinale
+    if (full_write(socket_fd, &package, sizeof(REPORT)) < 0) {
+        perror("full_write() error");
+        exit(1);    
+    }
+
+    close(socket_fd);
+}
+
+void receive_report(int connect_fd) {
+    REPORT package;
+
+    //Legge i dati del pacchetto REPORT inviato dall'ASL
+    if (full_read(connect_fd, &package, sizeof(REPORT)) < 0) {
+        perror("full_read() error");
+        exit(1);
+    }
+
+    send_report(package);
+}
+
 int main() {
     int listen_fd, connect_fd;
     struct sockaddr_in serv_addr;
     pid_t pid;
+    char start_bit;
+
     signal(SIGINT,handler); //Cattura il segnale CTRL-C
     //Creazione descrizione del socket
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -247,8 +326,18 @@ int main() {
         if (pid == 0) {
             close(listen_fd);
 
-            //Riceve informazioni dall'utente
-            receive_ID(connect_fd);
+            /*
+                Il ServerVerifica riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome due connessioni differenti.
+                Quando riceve come bit 1 allora il figlio gestirà la connessione con l'ASL.
+                Quando riceve come bit 0 allora il figlio gestirà la connessione con l'AppVerifica.
+            */
+            if (full_read(connect_fd, &start_bit, sizeof(char)) < 0) {
+                perror("full_read() error");
+                exit(1);
+            }
+            if (start_bit == '1') receive_report(connect_fd);   //Riceve informazioni dall'ASL
+            else if (start_bit == '0') receive_ID(connect_fd);  //Riceve informazioni dall'AppVerifica
+            else printf("Client non riconosciuto\n");
 
             close(connect_fd);
             exit(0);

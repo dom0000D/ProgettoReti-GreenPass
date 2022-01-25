@@ -139,16 +139,16 @@ void modify_report(int connect_fd) {
     if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
         perror("write() error");
         exit(1);
-    }    
+    }
 }
 
 
-/*
+  /*
     Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass nel file system relativo al numero di tessera
     sanitaria ricevuto e lo invia al ServerVerifica.
-*/
+  */
 void SV_comunication(int connect_fd) {
-    char start_bit, 
+    char start_bit,
 
     report = '1';
 
@@ -217,7 +217,7 @@ int main() {
         exit(1);
     }
 
-    //Mette il socket in ascolto in attesa di nuove connessione
+    //Mette il socket in ascolto in attesa di nuove connessioni
     if (listen(listen_fd, 1024) < 0) {
         perror("listen() error");
         exit(1);
@@ -244,7 +244,7 @@ int main() {
             close(listen_fd);
 
             /*
-                Il ServerVaccinale riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome due connessioni differenti.
+                Il ServerVaccinale riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome ci sono due connessioni differenti.
                 Quando riceve come bit 1 allora il figlio gestirà la connessione con il CentroVaccinale.
                 Quando riceve come bit 0 allora il figlio gestirà la connessione con il ServerVerifica.
             */

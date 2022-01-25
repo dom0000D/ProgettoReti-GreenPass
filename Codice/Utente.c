@@ -11,7 +11,7 @@
 #define ID_SIZE 11
 #define ACK_SIZE 61
 
-//Definiamo il pacchetto applicazione per lo user da inviare al client centro vaccinale
+//Definiamo il pacchetto applicazione per l'user da inviare al client centro vaccinale
 typedef struct {
     char name[MAX_SIZE];
     char surname[MAX_SIZE];
@@ -83,9 +83,9 @@ VAX_REQUEST create_package() {
         }
         if (strlen(buffer) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
-            strcpy(temp.ID, buffer); 
+            strcpy(temp.ID, buffer);
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-            temp.ID[ID_SIZE - 1] = 0;  
+            temp.ID[ID_SIZE - 1] = 0;
             break;
         }
     }

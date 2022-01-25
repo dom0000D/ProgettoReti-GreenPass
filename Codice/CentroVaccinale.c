@@ -171,7 +171,7 @@ void send_GP(GP_REQUEST gp) {
     close(socket_fd);
 }
 
-//Funzione per la gestione della comunicazione con l'utente
+    //Funzione per la gestione della comunicazione con l'utente
 void answer_user(int connect_fd) {
     char *hub_name[] = {"Milano", "Napoli", "Roma", "Torino", "Firenze", "Palermo", "Bari", "Catanzaro", "Bologna", "Udine"}; //Centri Vaccinali
     char buffer[MAX_SIZE];

@@ -259,7 +259,7 @@ void send_report(REPORT package) {
     //Invia il pacchetto appena ricevuto dall'ASL al ServerVaccinale
     if (full_write(socket_fd, &package, sizeof(REPORT)) < 0) {
         perror("full_write() error");
-        exit(1);    
+        exit(1);
     }
 
     close(socket_fd);
@@ -301,7 +301,7 @@ int main() {
         exit(1);
     }
 
-    //Mette il socket in ascolto in attesa di nuove connessione
+    //Mette il socket in ascolto in attesa di nuove connessioni
     if (listen(listen_fd, 1024) < 0) {
         perror("listen() error");
         exit(1);
@@ -327,7 +327,7 @@ int main() {
             close(listen_fd);
 
             /*
-                Il ServerVerifica riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome due connessioni differenti.
+                Il ServerVerifica riceve un bit come primo messaggio, che può avere valore 0 o 1, siccome abbiamo due connessioni differenti.
                 Quando riceve come bit 1 allora il figlio gestirà la connessione con l'ASL.
                 Quando riceve come bit 0 allora il figlio gestirà la connessione con l'AppVerifica.
             */

@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
     }
 
     printf("*** ASL ***\n");
-    printf("Immettere numero di tessera sanitaria ed il referto di un tampone per invalidare o ripristinare un green pass\n");
+    printf("Immettere un numero di tessera sanitaria ed il referto di un tampone per invalidare o ripristinare un Green Pass\n");
     //Inserimento codice tessera sanitaria
     while (1) {
         printf("Inserisci codice tessera sanitaria [Massimo 10 caratteri]: ");
@@ -99,15 +99,15 @@ int main(int argc, char **argv) {
         }
         if (strlen(buffer) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
-            strcpy(package.ID, buffer); 
+            strcpy(package.ID, buffer);
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-            package.ID[ID_SIZE - 1] = 0;  
+            package.ID[ID_SIZE - 1] = 0;
             break;
         }
     }
 
     while (1) {
-        printf("Inserire 0 per green pass non valido, 1 per green pass valido: ");
+        printf("Inserire 0 [Green Pass Valido]\n Inserire 1 [Green Pass Non Valido]: ");
         scanf("%c", &package.report);
         if (package.report == '1' || package.report == '0') break;
         printf("Errore: input errato, riprovare...\n\n");

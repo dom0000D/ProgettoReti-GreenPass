@@ -89,7 +89,7 @@ int main() {
     }
     printf("%s\n\n", buffer);
 
-//Inserimento codice tessera sanitaria
+    //Inserimento codice tessera sanitaria
     while (1) {
         printf("Inserisci codice tessera sanitaria [Massimo 10 caratteri]: ");
         if (fgets(buffer, MAX_SIZE, stdin) == NULL) {
@@ -98,9 +98,9 @@ int main() {
         }
         if (strlen(buffer) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
-            strcpy(ID, buffer); 
+            strcpy(ID, buffer);
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-            ID[ID_SIZE - 1] = 0;  
+            ID[ID_SIZE - 1] = 0;
             break;
         }
     }
@@ -129,7 +129,7 @@ int main() {
     }
 
     if (report == '0') printf("Green Pass non valido\n");
-    if (report == '1') printf("Green Pass Valido\n");
+    if (report == '1') printf("Green Pass valido\n");
 
     close(socket_fd);
 

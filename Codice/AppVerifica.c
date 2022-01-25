@@ -17,11 +17,11 @@ ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_read;
     n_left = count;
-    while (n_left > 0) {
+    while (n_left > 0) {  // repeat finchè non ci sono left
         if ((n_read = read(fd, buffer, n_left)) < 0) {
-            if (errno == EINTR) continue;
+            if (errno == EINTR) continue; // Se si verifica una System Call che interrompe ripeti il ciclo
             else exit(n_read);
-        } else if (n_read == 0) break;
+        } else if (n_read == 0) break; // Se sono finiti, esci
         n_left -= n_read;
         buffer += n_read;
     }
@@ -35,10 +35,10 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_written;
     n_left = count;
-    while (n_left > 0) {
+    while (n_left > 0) {          //repeat finchè non ci sono left
         if ((n_written = write(fd, buffer, n_left)) < 0) {
-            if (errno == EINTR) continue;
-            else exit(n_written);
+            if (errno == EINTR) continue; //Se si verifica una System Call che interrompe ripeti il ciclo
+            else exit(n_written); //Se non è una System Call, esci con un errore
         }
         n_left -= n_written;
         buffer += n_written;
@@ -47,12 +47,13 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
+
 int main() {
     int socket_fd;
     struct sockaddr_in server_addr;
     char start_bit, report, buffer[MAX_SIZE], ID[ID_SIZE];
 
-    start_bit = '0';
+    start_bit = '0'; //Inizializziamo il bit a 0 per inviarlo al ServerVerifica
 
     //Creazione del descrittore del socket
     if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -128,6 +129,7 @@ int main() {
         exit(1);
     }
 
+    //Controllo sul report ricevuto
     if (report == '0') printf("Green Pass non valido\n");
     if (report == '1') printf("Green Pass valido\n");
 

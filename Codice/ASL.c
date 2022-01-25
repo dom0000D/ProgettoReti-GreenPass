@@ -22,11 +22,11 @@ ssize_t full_read(int fd, void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_read;
     n_left = count;
-    while (n_left > 0) {
+    while (n_left > 0) {  // repeat finchè non ci sono left
         if ((n_read = read(fd, buffer, n_left)) < 0) {
-            if (errno == EINTR) continue;
+            if (errno == EINTR) continue; // Se si verifica una System Call che interrompe ripeti il ciclo
             else exit(n_read);
-        } else if (n_read == 0) break;
+        } else if (n_read == 0) break; // Se sono finiti, esci
         n_left -= n_read;
         buffer += n_read;
     }
@@ -40,10 +40,10 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     size_t n_left;
     ssize_t n_written;
     n_left = count;
-    while (n_left > 0) {
+    while (n_left > 0) {          //repeat finchè non ci sono left
         if ((n_written = write(fd, buffer, n_left)) < 0) {
-            if (errno == EINTR) continue;
-            else exit(n_written);
+            if (errno == EINTR) continue; //Se si verifica una System Call che interrompe ripeti il ciclo
+            else exit(n_written); //Se non è una System Call, esci con un errore
         }
         n_left -= n_written;
         buffer += n_written;
@@ -52,13 +52,14 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
+
 int main(int argc, char **argv) {
     int socket_fd;
     struct sockaddr_in server_addr;
     REPORT package;
     char start_bit, buffer[MAX_SIZE];
 
-    start_bit = '1';
+    start_bit = '1'; //Inizializziamo il bit a 1 da inviare al ServerVerifica
 
     //Creazione del descrittore del socket
     if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -109,6 +110,8 @@ int main(int argc, char **argv) {
     while (1) {
         printf("Inserire 0 [Green Pass Valido]\n Inserire 1 [Green Pass Non Valido]: ");
         scanf("%c", &package.report);
+
+        //Controllo sull'input dell'utente, se !=0 o !=1 dovrà ripetere l'operazione
         if (package.report == '1' || package.report == '0') break;
         printf("Errore: input errato, riprovare...\n\n");
     }

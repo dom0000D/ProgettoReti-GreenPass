@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
     }
 
     while (1) {
-        printf("Inserire 0 [Green Pass Valido]\n Inserire 1 [Green Pass Non Valido]: ");
+        printf("Inserire 0 [Green Pass Non Valido]\nInserire 1 [Green Pass Valido]: ");
         scanf("%c", &package.report);
 
         //Controllo sull'input dell'utente, se !=0 o !=1 dovrà ripetere l'operazione

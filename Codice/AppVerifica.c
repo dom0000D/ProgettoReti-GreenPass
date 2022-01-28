@@ -10,6 +10,7 @@
 #define MAX_SIZE 1024
 #define ACK_SIZE 64
 #define WELCOME_SIZE 108
+#define ASL_ACK 39
 #define ID_SIZE 11 //10 byte per la tessera sanitaria più un byte per il terminatore
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -122,16 +123,13 @@ int main() {
     //Facciamo attendere 3 secondi per completare l'operazione di verifica
     printf("Convalida in corso, attendere...\n\n");
     sleep(3);
-
-    //Ricezione del report
-    if (full_read(socket_fd, &report, sizeof(char)) < 0) {
+    
+    //Riceve esito scansione Green Pass dal ServerVerifica
+    if (full_read(socket_fd, buffer, ASL_ACK) < 0) {
         perror("full_read() error");
         exit(1);
     }
-
-    //Controllo sul report ricevuto
-    if (report == '0') printf("Green Pass non valido\n");
-    if (report == '1') printf("Green Pass valido\n");
+    printf("%s\n", buffer);
 
     close(socket_fd);
 

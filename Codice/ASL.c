@@ -10,6 +10,7 @@
 #define MAX_SIZE 1024
 #define ID_SIZE 11
 #define ACK_SIZE 61
+#define ASL_ACK 39
 
 //Struct del pacchetto dell'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
 typedef struct  {
@@ -108,7 +109,7 @@ int main(int argc, char **argv) {
     }
 
     while (1) {
-        printf("Inserire 0 [Green Pass Non Valido]\nInserire 1 [Green Pass Valido]: ");
+        printf("Inserire 0 [Green Pass Non Valido]\nInserire 1 [Green Pass Valido]\n[INPUT]: ");
         scanf("%c", &package.report);
 
         //Controllo sull'input dell'utente, se !=0 o !=1 dovrà ripetere l'operazione
@@ -116,11 +117,21 @@ int main(int argc, char **argv) {
         printf("Errore: input errato, riprovare...\n\n");
     }
 
+    if (package.report == '1') printf("\nInvio richiesta di ripristino Green Pass...\n");
+    else printf("\nInvio richiesta di sospensione Green Pass...\n");
+
     //Invia pacchetto report al ServerVerifica
     if (full_write(socket_fd, &package, sizeof(REPORT)) < 0) {
         perror("full_write() error");
         exit(1);
     }
+
+    if (full_read(socket_fd, buffer, ASL_ACK) < 0) {
+        perror("full_read() error");
+        exit(1);
+    }
+    sleep(2);
+    printf("%s\n", buffer);
 
     exit(0);
 }

@@ -13,17 +13,7 @@
 #define WELCOME_SIZE 108
 #define ID_SIZE 11
 #define ACK_SIZE 64
-
-//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
-void handler (int sign){
-if (sign==SIGINT) {
-  printf("\nUscita in corso...\n");
-  sleep (2);
-  printf("***Grazie per aver utilizzato il nostro servizio di verifica GP***\n");
-
-  exit(0);
-  }
-}
+#define ASL_ACK 39
 
 //Struct che permette di salvare una data, formata dai campi: giorno, mese ed anno
 typedef struct {
@@ -81,6 +71,16 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
+//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
+void handler (int sign){
+    if (sign == SIGINT) {
+        printf("\nUscita in corso...\n");
+        sleep(2);
+        printf("***Grazie per aver utilizzato il nostro servizio di verifica GP***\n");
+
+        exit(0);
+    }
+}
 
 void create_current_date(DATE *start_date) {
     time_t ticks;
@@ -103,9 +103,6 @@ char verify_ID(char ID[]) {
     char buffer[MAX_SIZE], report, start_bit;
     GP_REQUEST gp;
     DATE current_date;
-
-    //Inizializziamo il report di convalida ad 1 ovvero il caso in cui un green pass sia valido
-    report = '1';
 
     //Valorizziamo start_bit a 0 per far capire al ServerVaccinale che la comunicazione è con il ServerVerifica
     start_bit = '0';
@@ -152,28 +149,36 @@ char verify_ID(char ID[]) {
         exit(1);
     }
 
-    //Ricezione dell'esito della verifica dal ServerVaccinale, se 0 non valido se 1 valido
-    if (full_read(socket_fd, &gp, sizeof(GP_REQUEST)) < 0) {
+    //Riceve report dal ServerVaccinale
+    if (full_read(socket_fd, &report, sizeof(char)) < 0) {
         perror("full_read() error");
         exit(1);
     }
 
-    close(socket_fd);
+    if (report == '1') {
+        //Ricezione dell'esito della verifica dal ServerVaccinale, se 0 non valido se 1 valido
+        if (full_read(socket_fd, &gp, sizeof(GP_REQUEST)) < 0) {
+            perror("full_read() error");
+            exit(1);
+        }
 
-    //Funzione per ricavare la data corrente
-    create_current_date(&current_date);
+        close(socket_fd);
 
-    /*
-        Se l'anno corrente è maggiore dell'anno di scadenza del green pass, questo non è valido e assegnamo a report il valore di 0
-        Se l'anno della scadenza del green pass è valido MA il mese corrente è maggiore del mese di scadenza del green pass,
-        questo non è valido e assegnamo a report il valore di 0
-        Se l'anno e il mese della scadenza del green pass è valido MA il giorno corrente è maggiore del giorno di scadenza del green
-        pass, questo non è valido e assegnamo a report il valore di 0
-    */
-    if (current_date.year > gp.expire_date.year) report = '0';
-    if (report == '1' && current_date.month > gp.expire_date.month) report = '0';
-    if (report == '1' && current_date.day > gp.expire_date.day) report = '0';
-    if (report == '1' && gp.report == '0') report = '0'; //Se il Green Pass è valido temporalmente MA il report (esito del tampone) è negativo, allora il GP non è valido
+        //Funzione per ricavare la data corrente
+        create_current_date(&current_date);
+
+        /*
+            Se l'anno corrente è maggiore dell'anno di scadenza del green pass, questo non è valido e assegnamo a report il valore di 0
+            Se l'anno della scadenza del green pass è valido MA il mese corrente è maggiore del mese di scadenza del green pass,
+            questo non è valido e assegnamo a report il valore di 0
+            Se l'anno e il mese della scadenza del green pass è valido MA il giorno corrente è maggiore del giorno di scadenza del green
+            pass, questo non è valido e assegnamo a report il valore di 0
+        */
+        if (current_date.year > gp.expire_date.year) report = '0';
+        if (report == '1' && current_date.month > gp.expire_date.month) report = '0';
+        if (report == '1' && current_date.day > gp.expire_date.day) report = '0';
+        if (report == '1' && gp.report == '0') report = '0'; //Se il Green Pass è valido temporalmente MA il report (esito del tampone) è negativo, allora il GP non è valido
+    }
 
     return report;
 }
@@ -183,7 +188,7 @@ void receive_ID(int connect_fd) {
     char report, buffer[MAX_SIZE], ID[ID_SIZE];
     int index, welcome_size, package_size;
 
-    //Stampa un messaggo di benvenuto da inviare al clientS quando si collega ServerVerifica.
+    //Stampa un messaggo di benvenuto da inviare all'AppVerifica quando si collega ServerVerifica.
     snprintf(buffer, WELCOME_SIZE, "***Benvenuto nel server di verifica***\nInserisci il numero di tessera sanitaria per testarne la validità.");
     buffer[WELCOME_SIZE - 1] = 0;
     if(full_write(connect_fd, buffer, WELCOME_SIZE) < 0) {
@@ -191,7 +196,7 @@ void receive_ID(int connect_fd) {
         exit(1);
     }
 
-    //Riceve il numero di codice fiscale dal clientS
+    //Riceve il numero di codice fiscale dall'AppVerica
     if(full_read(connect_fd, ID, ID_SIZE) < 0) {
         perror("full_read error");
         exit(1);
@@ -209,18 +214,34 @@ void receive_ID(int connect_fd) {
     report = verify_ID(ID);
 
     //Invia il report di validità del green pass all'App di verifica
-    if (full_write(connect_fd, &report, sizeof(char)) < 0) {
-        perror("full_write() error");
-        exit(1);
+    if (report == '1') {
+        strcpy(buffer, "Green Pass valido, operazione conclusa");
+        printf("buffer: %s\n", buffer);
+        if(full_write(connect_fd, buffer, ASL_ACK) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
+    } else if (report == '0') {
+        strcpy(buffer, "Green Pass non valido, uscita in corso");
+        if(full_write(connect_fd, buffer, ASL_ACK) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
+    } else {
+        strcpy(buffer, "Numero tessera sanitaria non esistente");
+        if(full_write(connect_fd, buffer, ASL_ACK) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
     }
 
     close(connect_fd);
 }
 
-void send_report(REPORT package) {
+char send_report(REPORT package) {
     int socket_fd;
     struct sockaddr_in server_addr;
-    char start_bit, buffer[MAX_SIZE];
+    char start_bit, buffer[MAX_SIZE], report;
 
     start_bit = '0';
 
@@ -264,11 +285,21 @@ void send_report(REPORT package) {
         exit(1);
     }
 
+    //Riceve il report dal ServerVerifica
+    if (full_read(socket_fd, &report, sizeof(report)) < 0) {
+        perror("full_read() error");
+        exit(1);
+    }
+
     close(socket_fd);
+
+    return report;
 }
 
 void receive_report(int connect_fd) {
     REPORT package;
+    char report, buffer[MAX_SIZE];
+
 
     //Legge i dati del pacchetto REPORT inviato dall'ASL
     if (full_read(connect_fd, &package, sizeof(REPORT)) < 0) {
@@ -276,7 +307,21 @@ void receive_report(int connect_fd) {
         exit(1);
     }
 
-    send_report(package);
+    report = send_report(package);
+
+    if (report == '1') {
+        strcpy(buffer, "Numero tessera sanitaria non esistente");
+        if(full_write(connect_fd, buffer, ASL_ACK) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
+    } else {
+        strcpy(buffer, "***Operazione avvenuta con successo***");
+        if(full_write(connect_fd, buffer, ASL_ACK) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
+    }
 }
 
 int main() {

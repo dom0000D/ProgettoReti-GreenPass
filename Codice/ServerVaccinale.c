@@ -12,17 +12,6 @@
 #define MAX_SIZE 2048
 #define ID_SIZE 11
 
-//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
-void handler (int sign){
-if (sign==SIGINT) {
-  printf("\nUscita in corso...\n");
-  sleep (2); //attende 2 secondi prima della prossima operazione
-  printf("***Grazie per aver utilizzato il nostro servizio***\n");
-
-  exit(0);
-  }
-}
-
 //Struct del pacchetto dell'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
 typedef struct  {
     char ID[ID_SIZE];
@@ -79,6 +68,16 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
+//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
+void handler (int sign){
+    if (sign == SIGINT) {
+        printf("\nUscita in corso...\n");
+        sleep(2); //attende 2 secondi prima della prossima operazione
+        printf("***Grazie per aver utilizzato il nostro servizio***\n");
+        exit(0);
+    }
+}
+
 void send_gp(int connect_fd) {
     char report, ID[ID_SIZE];
     int fd;
@@ -90,20 +89,39 @@ void send_gp(int connect_fd) {
         exit(1);
     }
 
-    if ((fd = open(ID, O_RDONLY, 0777)) < 0) {
-        perror("open() error");
-        exit(1);
-    }
-    if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
-        perror("read() error");
-        exit(1);
-    }
-    close(fd);
+    fd = open(ID, O_RDONLY, 0777);
+    /*
+        Se il numero di tessera sanitaria inviato dall'AppVerifca non esiste la variabile globale errno cattura l'evento ed in quel caso 
+        invia un report uguale ad 1 al ServerVerifica, che a sua volta aggiornerà l'AppVerifica dell'inesistenza del codice. In caso 
+        contrario invierà un report uguale a 0 per indicare che l'operazione è avvenuta correttamente.
+    */
+    if (errno == 2) {
+        printf("Numero tessera sanitaria non esistente, riprovare...\n");
+        report = '2';
+        //Invia il report al ServerVerifica
+        if (full_write(connect_fd, &report, sizeof(char)) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
+    } else {
+        if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+            perror("read() error");
+            exit(1);
+        }
+        close(fd);
 
-    //Mandiamo il green pass richiesto al ServerVerifica che controllerà la sua validità
-    if(full_write(connect_fd, &gp, sizeof(GP_REQUEST)) < 0) {
-        perror("full_write() error");
-        exit(1);
+        report = '1';
+        //Invia il report al ServerVerifica
+        if (full_write(connect_fd, &report, sizeof(char)) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
+
+        //Mandiamo il green pass richiesto al ServerVerifica che controllerà la sua validità
+        if(full_write(connect_fd, &gp, sizeof(GP_REQUEST)) < 0) {
+            perror("full_write() error");
+            exit(1);
+        }
     }
 }
 
@@ -111,6 +129,7 @@ void modify_report(int connect_fd) {
     REPORT package;
     GP_REQUEST gp;
     int fd;
+    char report;
 
     //Riceve il pacchetto dal ServerVerifica proveniente dall'ASL contenente numero di tessera sanitaria ed il referto del tampone
     if (full_read(connect_fd, &package, sizeof(REPORT)) < 0) {
@@ -119,26 +138,40 @@ void modify_report(int connect_fd) {
     }
 
     //Apre il file contenente il green pass relativo al numero di tessera ricevuto dall'ASL
-    if ((fd = open(package.ID, O_RDWR , 0777)) < 0) {
-        perror("open() error");
-        exit(1);
+    fd = open(package.ID, O_RDWR , 0777);
+
+    /*
+        Se il numero di tessera sanitaria inviato dall'ASL non esiste la variabile globale errno cattura l'evento ed in quel caso 
+        invia un report uguale ad 1 al ServerVerifica, che a sua volta aggiornerà l'ASL dell'inesistenza del codice. In caso contrario
+        invierà un report uguale a 0 per indicare che l'operazione è avvenuta correttamente.
+    */
+    if (errno == 2) {
+        printf("Numero tessera sanitaria non esistente, riprovare...\n");
+        report = '1';
+    } else {
+        //Legge il file aperto contenente il green pass relativo al numero di tessera ricevuto dall'ASL
+        if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+            perror("read() error");
+            exit(1);
+        }
+
+        //Assegna il referto ricevuto dall'ASL al green pass
+        gp.report = package.report;
+
+        //Ci posizioniamo all'inizio dello stream del file
+        lseek(fd, 0, SEEK_SET);
+
+        //Andiamo a sovrascrivere i campi di GP nel file binario con nome il numero di tessera sanitaria del green pass
+        if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
+            perror("write() error");
+            exit(1);
+        }
+
+        report = '0';
     }
-
-    //Legge il file aperto contenente il green pass relativo al numero di tessera ricevuto dall'ASL
-    if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
-        perror("read() error");
-        exit(1);
-    }
-
-    //Assegna il referto ricevuto dall'ASL al green pass
-    gp.report = package.report;
-
-    //Ci posizioniamo all'inizio dello stream del file
-    lseek(fd, 0, SEEK_SET);
-
-    //Andiamo a sovrascrivere i campi di GP nel file binario con nome il numero di tessera sanitaria del green pass
-    if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
-        perror("write() error");
+    //Invia il report al ServerVerifica
+    if (full_write(connect_fd, &report, sizeof(char)) < 0) {
+        perror("full_write() error");
         exit(1);
     }
 }
@@ -162,7 +195,7 @@ void SV_comunication(int connect_fd) {
         perror("full_read() error");
         exit(1);
     }
-    if (start_bit == '0') modify_report(connect_fd);
+    if (start_bit == '0') modify_report(connect_fd); 
     else if (start_bit == '1') send_gp(connect_fd);
     else printf("Dato non valido\n\n");
 }

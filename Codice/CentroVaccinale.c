@@ -13,16 +13,6 @@
 #define ID_SIZE 11
 #define ACK_SIZE 61
 
-//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
-void handler (int sign){
-if (sign==SIGINT) {
-  printf("\nUscita in corso...\n");
-  sleep (2);
-  printf("***Grazie per aver utilizzato il nostro servizio***\n");
-
-  exit(0);
-  }
-}
 //Struct del pacchetto che il centro vaccinale deve ricevere dall'utente contentente nome, cognome e numero di tessera sanitaria dell'utente
 typedef struct {
     char name[MAX_SIZE];
@@ -79,6 +69,16 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
     return n_left;
 }
 
+//Handler che cattura il segnale CTRL-C e stampa un messaggio di arrivederci.
+void handler (int sign){
+    if (sign == SIGINT) {
+        printf("\nUscita in corso...\n");
+        sleep(2);
+        printf("***Grazie per aver utilizzato il nostro servizio***\n");
+
+        exit(0);
+    }
+}
 
 //Funzione per calcolare la data di scadenza e la data di inizio validità del green pass
 void create_expire_date(DATE *expire_date) {

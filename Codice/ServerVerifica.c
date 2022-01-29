@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
+#include <errno.h>      // libreria standard del C che contiene definizioni di macro per la gestione delle situazioni di errore.
 #include <string.h>
+#include <netdb.h>      // contiene le definizioni per le operazioni del database di rete.
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <sys/socket.h> //contiene le definizioni dei socket.
+#include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
 #include <time.h>
-#include <netdb.h>
-#include <signal.h>
+#include <signal.h>     //consente l'utilizzo delle funzioni per la gestione dei segnali fra processi.
+
 #define MAX_SIZE 1024
 #define WELCOME_SIZE 108
 #define ID_SIZE 11
@@ -82,6 +83,7 @@ void handler (int sign){
     }
 }
 
+//Funzione per estrapolare la data corrente del sistema, verrà usata per fare le operazioni di verifica GP
 void create_current_date(DATE *start_date) {
     time_t ticks;
     ticks = time(NULL);

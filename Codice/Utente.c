@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
+#include <errno.h>      // libreria standard del C che contiene definizioni di macro per la gestione delle situazioni di errore.
 #include <string.h>
-#include <netdb.h>
+#include <netdb.h>      // contiene le definizioni per le operazioni del database di rete.
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <sys/socket.h> //contiene le definizioni dei socket.
+#include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
+
+
 #define MAX_SIZE 1024
 #define ID_SIZE 11
 #define ACK_SIZE 61

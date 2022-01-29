@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
+#include <errno.h>      // libreria standard del C che contiene definizioni di macro per la gestione delle situazioni di errore.
 #include <string.h>
-#include <netdb.h>
+#include <netdb.h>      // contiene le definizioni per le operazioni del database di rete.
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <sys/socket.h> //contiene le definizioni dei socket.
+#include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
 #define MAX_SIZE 1024
 #define ID_SIZE 11
 #define ACK_SIZE 61
-#define ASL_ACK 39
+#define ASL_ACK 39 //size per gli ACK inviati all'ASL
 
 //Struct del pacchetto dell'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
 typedef struct  {
@@ -117,6 +117,7 @@ int main(int argc, char **argv) {
         printf("Errore: input errato, riprovare...\n\n");
     }
 
+    // Controllo sull'input dell'utente
     if (package.report == '1') printf("\nInvio richiesta di ripristino Green Pass...\n");
     else printf("\nInvio richiesta di sospensione Green Pass...\n");
 
@@ -125,12 +126,14 @@ int main(int argc, char **argv) {
         perror("full_write() error");
         exit(1);
     }
-
+    //Riceve messaggio di report dal ServerVerifica
     if (full_read(socket_fd, buffer, ASL_ACK) < 0) {
         perror("full_read() error");
         exit(1);
     }
+    //Simuliamo un caricamento con la sleep
     sleep(2);
+    //Stampa del messaggio di report ricevuto
     printf("%s\n", buffer);
 
     exit(0);

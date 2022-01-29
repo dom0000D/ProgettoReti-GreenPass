@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
+#include <errno.h>      // libreria standard del C che contiene definizioni di macro per la gestione delle situazioni di errore.
 #include <string.h>
+#include <netdb.h>      // contiene le definizioni per le operazioni del database di rete.
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <sys/socket.h> //contiene le definizioni dei socket.
+#include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
 #include <time.h>
-#include <netdb.h>
-#include <signal.h>
+#include <signal.h>     //consente l'utilizzo delle funzioni per la gestione dei segnali fra processi.
 #define MAX_SIZE 1024
 #define ID_SIZE 11
 #define ACK_SIZE 61
@@ -215,7 +215,7 @@ void answer_user(int connect_fd) {
         exit(1);
     }
 
-    //Copio il numero di tessera sanitaria inviatoci dall'utente nel green pass da inviare al ServerVaccinale
+    //Copio il numero di tessera sanitaria inviato  dall'utente nel green pass da inviare al ServerVaccinale
     strcpy(gp.ID, package.ID);
     //Si ottiene la data di inizo validità del Green Pass
     create_start_date(&gp.start_date);

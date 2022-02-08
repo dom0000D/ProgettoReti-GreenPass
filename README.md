@@ -13,6 +13,6 @@ Progettare ed implementare un servizio di gestione dei green pass secondo le seg
 Si utilizzi il linguaggio C su piattaforma UNIX utilizzando i socket per la comunicazione tra processi. Corredare l’implementazione di adeguata documentazione.
 
 
-###Documentazione
-
-[Documentazione] https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Documentazione
+ 
+### Presentazione
+[Documentazione](https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Documentazione)

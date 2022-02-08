@@ -15,5 +15,8 @@ Si utilizzi il linguaggio C su piattaforma UNIX utilizzando i socket per la comu
 
  
 ### Presentazione
-[Documentazione](https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Documentazione)
-[Progettazione] (https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Progettazione)
+- [Documentazione]
+ (https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Documentazione)
+- [Documentazione](https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Documentazione)
+- [Progettazione](https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Progettazione)  
+- [Codice](https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Codice) 

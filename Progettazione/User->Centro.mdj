@@ -197,14 +197,14 @@
 													"left": 962,
 													"top": 80,
 													"width": 1,
-													"height": 377
+													"height": 361
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 912,
 											"top": 40,
 											"width": 99.4599609375,
-											"height": 417,
+											"height": 401,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRZtHJMbiU="
 											},
@@ -313,14 +313,14 @@
 													"left": 434,
 													"top": 80,
 													"width": 1,
-													"height": 465
+													"height": 353
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 352,
 											"top": 40,
 											"width": 164.498046875,
-											"height": 505,
+											"height": 393,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRk93JrGKU="
 											},
@@ -348,7 +348,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 920,
-											"top": 456,
+											"top": 432,
 											"width": 82.24267578125,
 											"height": 33,
 											"text": "Exit()"
@@ -395,7 +395,7 @@
 											"top": 104,
 											"width": 489,
 											"height": 25,
-											"text": "Invia messaggio di benvenuto e un form da compilare"
+											"text": "Invia messaggio di benvenuto e un form da compilare di [N BYTE]"
 										},
 										{
 											"_type": "UMLTextView",
@@ -407,8 +407,8 @@
 											"left": 504,
 											"top": 176,
 											"width": 385,
-											"height": 116,
-											"text": "Invia nome, cognome e numero di tessera sanitaria"
+											"height": 25,
+											"text": "Invia il PACCHETTO VAX_REQUEST"
 										},
 										{
 											"_type": "UMLTextView",
@@ -419,9 +419,9 @@
 											"font": "Arial;13;0",
 											"left": 504,
 											"top": 248,
-											"width": 257,
+											"width": 409,
 											"height": 90,
-											"text": "Invia messaggio di ricezione dati avvenuta "
+											"text": "Invia messaggio di ricezione dati avvenuta con ACK_SIZE = 61 byte"
 										}
 									]
 								}

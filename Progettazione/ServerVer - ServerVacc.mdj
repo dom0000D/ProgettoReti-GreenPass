@@ -85,7 +85,7 @@
 											"left": 288,
 											"top": 8,
 											"width": 801,
-											"height": 473,
+											"height": 425,
 											"nameLabel": {
 												"$ref": "AAAAAAF+fjRGZ3I+6PQ="
 											},
@@ -197,14 +197,14 @@
 													"left": 972,
 													"top": 80,
 													"width": 1,
-													"height": 361
+													"height": 321
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 912,
 											"top": 40,
 											"width": 119.7470703125,
-											"height": 401,
+											"height": 361,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRZtHJMbiU="
 											},
@@ -313,14 +313,14 @@
 													"left": 434,
 													"top": 80,
 													"width": 1,
-													"height": 369
+													"height": 321
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 352,
 											"top": 40,
 											"width": 164.498046875,
-											"height": 409,
+											"height": 361,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRk93JrGKU="
 											},
@@ -342,91 +342,13 @@
 										},
 										{
 											"_type": "UMLTextBoxView",
-											"_id": "AAAAAAF+fjtu4XLnElw=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 392,
-											"top": 184,
-											"width": 82.24267578125,
-											"height": 33,
-											"text": "2)FullWrite()"
-										},
-										{
-											"_type": "UMLTextBoxView",
-											"_id": "AAAAAAF+fjvQDHL0c1I=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 392,
-											"top": 288,
-											"width": 82.24267578125,
-											"height": 33,
-											"text": "3)FullRead()"
-										},
-										{
-											"_type": "UMLTextBoxView",
-											"_id": "AAAAAAF+fjvU83L4Rx4=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 392,
-											"top": 112,
-											"width": 82.24267578125,
-											"height": 33,
-											"text": "1)FullWrite()"
-										},
-										{
-											"_type": "UMLTextBoxView",
-											"_id": "AAAAAAF+fjzSWHMNTb0=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 920,
-											"top": 112,
-											"width": 82.24267578125,
-											"height": 33,
-											"text": "FullRead()"
-										},
-										{
-											"_type": "UMLTextBoxView",
-											"_id": "AAAAAAF+fj1JuHMZpkY=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 920,
-											"top": 184,
-											"width": 82.24267578125,
-											"height": 33,
-											"text": "FullRead()"
-										},
-										{
-											"_type": "UMLTextBoxView",
-											"_id": "AAAAAAF+fj1z9XMfVX8=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 920,
-											"top": 288,
-											"width": 82.24267578125,
-											"height": 33,
-											"text": "FullWrite()"
-										},
-										{
-											"_type": "UMLTextBoxView",
 											"_id": "AAAAAAF+fj+eenM3HLc=",
 											"_parent": {
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
 											"left": 920,
-											"top": 416,
+											"top": 392,
 											"width": 82.24267578125,
 											"height": 33,
 											"text": "Exit()"
@@ -439,7 +361,7 @@
 											},
 											"font": "Arial;13;0",
 											"lineStyle": 1,
-											"points": "472:128;920:128",
+											"points": "432:128;968:128",
 											"headEndStyle": 2
 										},
 										{
@@ -449,7 +371,7 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"points": "920:200;472:200",
+											"points": "968:240;432:240",
 											"tailEndStyle": 2
 										},
 										{
@@ -459,7 +381,7 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"points": "472:304;920:304",
+											"points": "432:304;968:304",
 											"tailEndStyle": 2
 										},
 										{
@@ -481,9 +403,9 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"left": 480,
+											"left": 488,
 											"top": 104,
-											"width": 561,
+											"width": 553,
 											"height": 25,
 											"text": "Invia un bit = 0 per essere riconosciuto dal ServerVaccinale"
 										},
@@ -506,11 +428,11 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"left": 480,
-											"top": 176,
+											"left": 592,
+											"top": 216,
 											"width": 409,
 											"height": 103,
-											"text": "Invia un numero di tessera sanitaria ricevuto dall'AppVerifica"
+											"text": "Invia il pacchetto REPORT"
 										},
 										{
 											"_type": "UMLTextView",
@@ -524,6 +446,30 @@
 											"width": 457,
 											"height": 38,
 											"text": "Il ServerVaccinale effettua una ricerca nel suo filesystem: se il codice è presente invierà il GP al ServerVerifica o darà un esito negativo"
+										},
+										{
+											"_type": "FreelineEdgeView",
+											"_id": "AAAAAAF+2jL1gtde8Y4=",
+											"_parent": {
+												"$ref": "AAAAAAF+fjRGZnI8tp8="
+											},
+											"font": "Arial;13;0",
+											"lineStyle": 1,
+											"points": "432:192;968:192",
+											"headEndStyle": 2
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAF+2jMnAddjoN0=",
+											"_parent": {
+												"$ref": "AAAAAAF+fjRGZnI8tp8="
+											},
+											"font": "Arial;13;0",
+											"left": 440,
+											"top": 160,
+											"width": 537,
+											"height": 25,
+											"text": "Invia un bit = 0 al ServerVaccinale per informarlo che deve modificare il report del GP"
 										}
 									]
 								}
@@ -563,7 +509,8 @@
 							"_parent": {
 								"$ref": "AAAAAAF+fjRGZXI6+VM="
 							},
-							"name": "Role1"
+							"name": "Role1",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -571,7 +518,8 @@
 							"_parent": {
 								"$ref": "AAAAAAF+fjRGZXI6+VM="
 							},
-							"name": "Role2"
+							"name": "Role2",
+							"type": ""
 						}
 					]
 				}

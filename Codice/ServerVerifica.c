@@ -99,6 +99,9 @@ void create_current_date(DATE *start_date) {
     start_date->year = s_date->tm_year;
 }
 
+ /* Funzione usata per la scansione del certificato verde. Riceve un numero di tessera sanitaria
+  dall'App Verifica, chiede al ServerVaccinale il report e dopo aver
+   fatto delle procedure di verifica, comunica l'esito all'App Verifica*/
 char verify_ID(char ID[]) {
     int socket_fd, welcome_size, package_size;
     struct sockaddr_in server_addr;

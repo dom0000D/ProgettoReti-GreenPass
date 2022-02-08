@@ -178,7 +178,7 @@ void modify_report(int connect_fd) {
 
 
   /*
-    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass nel file system relativo al numero di tessera
+    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass dak file system relativo al numero di tessera
     sanitaria ricevuto e lo invia al ServerVerifica.
   */
 void SV_comunication(int connect_fd) {

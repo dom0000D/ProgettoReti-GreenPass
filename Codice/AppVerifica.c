@@ -84,7 +84,7 @@ int main() {
         exit(1);
     }
 
-    //Riceve il benevenuto dal ServerVerifica
+    //Riceve il benvenuto dal ServerVerifica
     if (full_read(socket_fd, buffer, WELCOME_SIZE) < 0) {
         perror("full_read() error");
         exit(1);

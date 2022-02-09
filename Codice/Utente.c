@@ -81,7 +81,6 @@ VAX_REQUEST create_package() {
             perror("fgets() error");
             exit(1);
         }
-       printf("%d\n %sc\n %d\n", strlen(buffer), buffer, ID_SIZE);
         if (strlen(temp.ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa

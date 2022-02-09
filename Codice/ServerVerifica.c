@@ -221,7 +221,6 @@ void receive_ID(int connect_fd) {
     //Invia il report di validità del green pass all'App di verifica
     if (report == '1') {
         strcpy(buffer, "Green Pass valido, operazione conclusa");
-        printf("buffer: %s\n", buffer);
         if(full_write(connect_fd, buffer, ASL_ACK) < 0) {
             perror("full_write() error");
             exit(1);

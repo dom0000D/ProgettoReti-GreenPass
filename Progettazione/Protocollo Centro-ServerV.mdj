@@ -85,7 +85,7 @@
 											"left": 288,
 											"top": 8,
 											"width": 801,
-											"height": 425,
+											"height": 313,
 											"nameLabel": {
 												"$ref": "AAAAAAF+fjRGZ3I+6PQ="
 											},
@@ -197,14 +197,14 @@
 													"left": 972,
 													"top": 80,
 													"width": 1,
-													"height": 305
+													"height": 225
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 912,
 											"top": 40,
 											"width": 119.7470703125,
-											"height": 345,
+											"height": 265,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRZtHJMbiU="
 											},
@@ -313,14 +313,14 @@
 													"left": 434,
 													"top": 80,
 													"width": 1,
-													"height": 305
+													"height": 225
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 352,
 											"top": 40,
 											"width": 164.498046875,
-											"height": 345,
+											"height": 265,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRk93JrGKU="
 											},
@@ -348,7 +348,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 936,
-											"top": 384,
+											"top": 272,
 											"width": 82.24267578125,
 											"height": 33,
 											"text": "Exit()"
@@ -366,22 +366,12 @@
 										},
 										{
 											"_type": "FreelineEdgeView",
-											"_id": "AAAAAAF+fkJFQnOyDME=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"points": "968:200;432:200",
-											"headEndStyle": 2
-										},
-										{
-											"_type": "FreelineEdgeView",
 											"_id": "AAAAAAF+fkOYTHPIWAw=",
 											"_parent": {
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"points": "432:272;968:272",
+											"points": "432:200;968:200",
 											"headEndStyle": 2
 										},
 										{
@@ -411,26 +401,13 @@
 										},
 										{
 											"_type": "UMLTextView",
-											"_id": "AAAAAAF+fyuOlNTZgoc=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 496,
-											"top": 176,
-											"width": 289,
-											"height": 38,
-											"text": "Invia un messaggio di attesa dati di [Inserire Byte]"
-										},
-										{
-											"_type": "UMLTextView",
 											"_id": "AAAAAAF+fyyIMdThn5k=",
 											"_parent": {
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"left": 496,
-											"top": 248,
+											"left": 464,
+											"top": 160,
 											"width": 657,
 											"height": 27,
 											"text": "Invia il pacchetto GP REQUEST per generare un GP\n"

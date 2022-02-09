@@ -381,7 +381,7 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"points": "432:304;968:304",
+											"points": "432:304;976:304",
 											"tailEndStyle": 2
 										},
 										{
@@ -407,7 +407,7 @@
 											"top": 104,
 											"width": 553,
 											"height": 25,
-											"text": "Invia un bit = 0 per essere riconosciuto dal ServerVaccinale"
+											"text": "Invia un byte = 0 per essere riconosciuto dal ServerVaccinale"
 										},
 										{
 											"_type": "UMLTextView",
@@ -428,11 +428,11 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"left": 592,
+											"left": 496,
 											"top": 216,
-											"width": 409,
-											"height": 103,
-											"text": "Invia il pacchetto REPORT"
+											"width": 369,
+											"height": 38,
+											"text": "Invia il codice fiscale ricevuto dall'App Verifica di 11 byte"
 										},
 										{
 											"_type": "UMLTextView",
@@ -442,10 +442,10 @@
 											},
 											"font": "Arial;13;0",
 											"left": 480,
-											"top": 264,
+											"top": 272,
 											"width": 457,
 											"height": 38,
-											"text": "Il ServerVaccinale effettua una ricerca nel suo filesystem: se il codice è presente invierà il GP al ServerVerifica o darà un esito negativo"
+											"text": "Invia un byte di verifica che può valere 0 se il GP non esiste, 1 se il GP esiste e gli invia il pacchetto GP_REQUEST"
 										},
 										{
 											"_type": "FreelineEdgeView",
@@ -469,7 +469,20 @@
 											"top": 160,
 											"width": 537,
 											"height": 25,
-											"text": "Invia un bit = 0 al ServerVaccinale per informarlo che deve modificare il report del GP"
+											"text": "Invia un byte = 1 al ServerVaccinale per informarlo che deve scansionare un GP"
+										},
+										{
+											"_type": "UMLTextBoxView",
+											"_id": "AAAAAAF+4Md1PyWV3JA=",
+											"_parent": {
+												"$ref": "AAAAAAF+fjRGZnI8tp8="
+											},
+											"font": "Arial;13;0",
+											"left": 288,
+											"top": 384,
+											"width": 95.236328125,
+											"height": 51,
+											"text": "OPERAZIONE CON APP VERIFICA"
 										}
 									]
 								}

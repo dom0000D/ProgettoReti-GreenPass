@@ -85,7 +85,7 @@
 											"left": 288,
 											"top": 8,
 											"width": 801,
-											"height": 537,
+											"height": 473,
 											"nameLabel": {
 												"$ref": "AAAAAAF+fjRGZ3I+6PQ="
 											},
@@ -391,11 +391,11 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"left": 504,
-											"top": 104,
+											"left": 456,
+											"top": 88,
 											"width": 489,
-											"height": 25,
-											"text": "Invia messaggio di benvenuto e un form da compilare di [N BYTE]"
+											"height": 38,
+											"text": "Invia messaggio di benvenuto e un form da compilare di 130 byte + il numero di byte per scrivere il nome del CentroVaccinale (varia randomicamente)"
 										},
 										{
 											"_type": "UMLTextView",
@@ -404,7 +404,7 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"left": 504,
+											"left": 520,
 											"top": 176,
 											"width": 385,
 											"height": 25,

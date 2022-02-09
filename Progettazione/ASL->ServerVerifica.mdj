@@ -42,7 +42,7 @@
 									"_parent": {
 										"$ref": "AAAAAAF+fjRGZnI7i4M="
 									},
-									"name": "Comunicazione AppVerificaGP -> ServerVerifica",
+									"name": "Comunicazione ASL -> ServerVerifica",
 									"ownedViews": [
 										{
 											"_type": "UMLFrameView",
@@ -63,9 +63,9 @@
 													"font": "Arial;13;0",
 													"left": 312.72998046875,
 													"top": 13,
-													"width": 278.82421875,
+													"width": 218.8515625,
 													"height": 13,
-													"text": "Comunicazione AppVerificaGP -> ServerVerifica"
+													"text": "Comunicazione ASL -> ServerVerifica"
 												},
 												{
 													"_type": "LabelView",
@@ -85,7 +85,7 @@
 											"left": 288,
 											"top": 8,
 											"width": 801,
-											"height": 561,
+											"height": 377,
 											"nameLabel": {
 												"$ref": "AAAAAAF+fjRGZ3I+6PQ="
 											},
@@ -134,9 +134,9 @@
 															"font": "Arial;13;1",
 															"left": 917,
 															"top": 47,
-															"width": 124.8671875,
+															"width": 127.5078125,
 															"height": 13,
-															"text": "Client_AppVerifica"
+															"text": "SERVER VERIFICA"
 														},
 														{
 															"_type": "LabelView",
@@ -169,7 +169,7 @@
 													"font": "Arial;13;0",
 													"left": 912,
 													"top": 40,
-													"width": 134.8671875,
+													"width": 137.5078125,
 													"height": 40,
 													"stereotypeLabel": {
 														"$ref": "AAAAAAF+fjRZtHJNOKc="
@@ -194,17 +194,17 @@
 														"$ref": "AAAAAAF+fjRZtHJK27Q="
 													},
 													"font": "Arial;13;0",
-													"left": 979,
+													"left": 981,
 													"top": 80,
 													"width": 1,
-													"height": 457
+													"height": 257
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 912,
 											"top": 40,
-											"width": 134.8671875,
-											"height": 497,
+											"width": 137.5078125,
+											"height": 297,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRZtHJMbiU="
 											},
@@ -254,7 +254,7 @@
 															"top": 47,
 															"width": 154.498046875,
 															"height": 13,
-															"text": "ServerVerifica"
+															"text": "ASL"
 														},
 														{
 															"_type": "LabelView",
@@ -313,14 +313,14 @@
 													"left": 434,
 													"top": 80,
 													"width": 1,
-													"height": 465
+													"height": 257
 												}
 											],
 											"font": "Arial;13;0",
 											"left": 352,
 											"top": 40,
 											"width": 164.498046875,
-											"height": 505,
+											"height": 297,
 											"nameCompartment": {
 												"$ref": "AAAAAAF+fjRk93JrGKU="
 											},
@@ -347,8 +347,8 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"left": 936,
-											"top": 528,
+											"left": 928,
+											"top": 328,
 											"width": 82.24267578125,
 											"height": 33,
 											"text": "Exit()"
@@ -361,7 +361,7 @@
 											},
 											"font": "Arial;13;0",
 											"lineStyle": 1,
-											"points": "432:160;976:160",
+											"points": "432:128;984:128",
 											"headEndStyle": 2
 										},
 										{
@@ -371,17 +371,7 @@
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
-											"points": "976:232;432:232",
-											"headEndStyle": 2
-										},
-										{
-											"_type": "FreelineEdgeView",
-											"_id": "AAAAAAF+fkOYTHPIWAw=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"points": "432:304;976:304",
+											"points": "984:240;432:240",
 											"headEndStyle": 2
 										},
 										{
@@ -398,101 +388,65 @@
 										},
 										{
 											"_type": "UMLTextView",
-											"_id": "AAAAAAF+gR+xCwnj6pc=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 440,
-											"top": 120,
-											"width": 521,
-											"height": 38,
-											"text": "Invia un messaggio di benvenuto di dimensione WELCOME_SIZE [108 byte] e richiede un numero di tessera sanitaria "
-										},
-										{
-											"_type": "UMLTextView",
-											"_id": "AAAAAAF+gSBxzQnrfoU=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 456,
-											"top": 192,
-											"width": 489,
-											"height": 38,
-											"text": "Invia un numero di tessera sanitaria per la scansione del GP di dimensione ID_SIZE [11 byte]"
-										},
-										{
-											"_type": "UMLTextView",
-											"_id": "AAAAAAF+gSEz6An0JAE=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 448,
-											"top": 264,
-											"width": 489,
-											"height": 90,
-											"text": "Invia una notifica al Client di corretta ricezione del dato di dimensione ACK_SIZE [64 byte]"
-										},
-										{
-											"_type": "UMLTextBoxView",
-											"_id": "AAAAAAF+gSJqZQn9NNc=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;16;0",
-											"left": 392,
-											"top": 352,
-											"width": 609,
-											"height": 60,
-											"text": "Il ServerVerifica ora aprirà una connessione col ServerVaccinale per effettuare tutte le operazioni necessarie a verificare la validità del certificato verde mentre l'AppVerifica è in attesa."
-										},
-										{
-											"_type": "FreelineEdgeView",
-											"_id": "AAAAAAF+gSYf6QoiFHw=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"points": "432:472;976:472",
-											"headEndStyle": 2
-										},
-										{
-											"_type": "UMLTextView",
-											"_id": "AAAAAAF+gSZqOgooEuM=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"left": 456,
-											"top": 440,
-											"width": 457,
-											"height": 64,
-											"text": "Invia l'esito di validità al client di dimensione ASL_ACK [39 byte]"
-										},
-										{
-											"_type": "FreelineEdgeView",
-											"_id": "AAAAAAF+4L39iwiQvDg=",
-											"_parent": {
-												"$ref": "AAAAAAF+fjRGZnI8tp8="
-											},
-											"font": "Arial;13;0",
-											"points": "976:104;434:104",
-											"headEndStyle": 2
-										},
-										{
-											"_type": "UMLTextView",
-											"_id": "AAAAAAF+4L5g1AiZ8b4=",
+											"_id": "AAAAAAF+gl68sW93l9I=",
 											"_parent": {
 												"$ref": "AAAAAAF+fjRGZnI8tp8="
 											},
 											"font": "Arial;13;0",
 											"left": 488,
-											"top": 80,
-											"width": 513,
-											"height": 90,
-											"text": "Invia un byte = 1 per notificare il ServerVerfica con chi sta comunicando"
+											"top": 104,
+											"width": 553,
+											"height": 25,
+											"text": "Invia un byte = 1 per essere riconosciuto dal ServerVerifica"
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAF+gmCxI2+CfNU=",
+											"_parent": {
+												"$ref": "AAAAAAF+fjRGZnI8tp8="
+											},
+											"font": "Arial;13;0",
+											"left": 448,
+											"top": 192,
+											"width": 60,
+											"height": 15
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAF+gmI8R2+aDc0=",
+											"_parent": {
+												"$ref": "AAAAAAF+fjRGZnI8tp8="
+											},
+											"font": "Arial;13;0",
+											"left": 496,
+											"top": 208,
+											"width": 433,
+											"height": 38,
+											"text": "Invia un messaggio di report di size ASL_ACK (39 byte)"
+										},
+										{
+											"_type": "FreelineEdgeView",
+											"_id": "AAAAAAF+2jL1gtde8Y4=",
+											"_parent": {
+												"$ref": "AAAAAAF+fjRGZnI8tp8="
+											},
+											"font": "Arial;13;0",
+											"lineStyle": 1,
+											"points": "432:192;984:192",
+											"headEndStyle": 2
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAF+2jMnAddjoN0=",
+											"_parent": {
+												"$ref": "AAAAAAF+fjRGZnI8tp8="
+											},
+											"font": "Arial;13;0",
+											"left": 496,
+											"top": 160,
+											"width": 537,
+											"height": 25,
+											"text": "Invia un pacchetto di tipo REPORT"
 										}
 									]
 								}
@@ -504,7 +458,7 @@
 									"_parent": {
 										"$ref": "AAAAAAF+fjRGZnI7i4M="
 									},
-									"name": "Client_AppVerifica",
+									"name": "SERVER VERIFICA",
 									"represent": {
 										"$ref": "AAAAAAF+fjRZs3JJ9z0="
 									},
@@ -516,7 +470,7 @@
 									"_parent": {
 										"$ref": "AAAAAAF+fjRGZnI7i4M="
 									},
-									"name": "ServerVerifica",
+									"name": "ASL",
 									"represent": {
 										"$ref": "AAAAAAF+fjRk93JoWLo="
 									},
@@ -532,8 +486,7 @@
 							"_parent": {
 								"$ref": "AAAAAAF+fjRGZXI6+VM="
 							},
-							"name": "Role1",
-							"type": ""
+							"name": "Role1"
 						},
 						{
 							"_type": "UMLAttribute",
@@ -541,8 +494,7 @@
 							"_parent": {
 								"$ref": "AAAAAAF+fjRGZXI6+VM="
 							},
-							"name": "Role2",
-							"type": ""
+							"name": "Role2"
 						}
 					]
 				}

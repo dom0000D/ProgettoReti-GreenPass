@@ -7,8 +7,6 @@
 #include <sys/types.h>
 #include <sys/socket.h> //contiene le definizioni dei socket.
 #include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
-
-
 #define MAX_SIZE 1024
 #define ID_SIZE 11
 #define ACK_SIZE 61
@@ -79,19 +77,18 @@ VAX_REQUEST create_package() {
     //Inserimento codice tessera sanitaria
     while (1) {
         printf("Inserisci codice tessera sanitaria [Massimo 10 caratteri]: ");
-        if (fgets(buffer, MAX_SIZE, stdin) == NULL) {
+        if (fgets(temp.ID, MAX_SIZE, stdin) == NULL) {
             perror("fgets() error");
             exit(1);
         }
-        if (strlen(buffer) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
+       printf("%d\n %sc\n %d\n", strlen(buffer), buffer, ID_SIZE);
+        if (strlen(temp.ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
-            strcpy(temp.ID, buffer);
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
             temp.ID[ID_SIZE - 1] = 0;
-            break;
+           break;
         }
     }
-
     return temp;
 }
 

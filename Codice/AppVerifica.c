@@ -94,13 +94,13 @@ int main() {
     //Inserimento codice tessera sanitaria
     while (1) {
         printf("Inserisci codice tessera sanitaria [Massimo 10 caratteri]: ");
-        if (fgets(buffer, MAX_SIZE, stdin) == NULL) {
+        if (fgets(ID, MAX_SIZE, stdin) == NULL) {
             perror("fgets() error");
             exit(1);
         }
-        if (strlen(buffer) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
+        if (strlen(ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
-            strcpy(ID, buffer);
+
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
             ID[ID_SIZE - 1] = 0;
             break;

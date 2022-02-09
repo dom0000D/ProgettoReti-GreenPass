@@ -4,6 +4,8 @@
 #include <errno.h>      // libreria standard del C che contiene definizioni di macro per la gestione delle situazioni di errore.
 #include <string.h>
 #include <fcntl.h>      // contiene opzioni di controllo dei file
+#include <sys/stat.h>
+#include <sys/file.h>
 #include <sys/types.h>
 #include <sys/socket.h> //contiene le definizioni dei socket.
 #include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
@@ -103,11 +105,22 @@ void send_gp(int connect_fd) {
             perror("full_write() error");
             exit(1);
         }
-    } else {
+    } else { 
+        //Accediamo in maniera mutuamente esclusiva al file in lettura
+        if (flock(fd, LOCK_EX) < 0) {
+            perror("flock() error");
+            exit(1); 
+        }
         if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
             perror("read() error");
             exit(1);
         }
+        //Sblocchiamo il lock
+        if(flock(fd, LOCK_UN) < 0) {
+            perror("flock() error");
+            exit(1);
+        }
+
         close(fd);
 
         report = '1';
@@ -122,7 +135,7 @@ void send_gp(int connect_fd) {
             perror("full_write() error");
             exit(1);
         }
-    }
+    } 
 }
 
 void modify_report(int connect_fd) {
@@ -149,6 +162,11 @@ void modify_report(int connect_fd) {
         printf("Numero tessera sanitaria non esistente, riprovare...\n");
         report = '1';
     } else {
+        //Accediamo in maniera mutuamente esclusiva al file in lettura
+        if(flock(fd, LOCK_EX | LOCK_NB) < 0) {
+            perror("flock() error");
+            exit(1);
+        }
         //Legge il file aperto contenente il green pass relativo al numero di tessera ricevuto dall'ASL
         if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
             perror("read() error");
@@ -164,6 +182,11 @@ void modify_report(int connect_fd) {
         //Andiamo a sovrascrivere i campi di GP nel file binario con nome il numero di tessera sanitaria del green pass
         if (write(fd, &gp, sizeof(GP_REQUEST)) < 0) {
             perror("write() error");
+            exit(1);
+        }
+        //Sblocchiamo il lock
+        if(flock(fd, LOCK_UN) < 0) {
+            perror("flock() error");
             exit(1);
         }
 

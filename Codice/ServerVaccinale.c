@@ -80,6 +80,7 @@ void handler (int sign){
     }
 }
 
+    //Funziona che invia un GP richiesto dal ServerVerifica
 void send_gp(int connect_fd) {
     char report, ID[ID_SIZE];
     int fd;
@@ -90,11 +91,11 @@ void send_gp(int connect_fd) {
         perror("full_read() error");
         exit(1);
     }
-
+    //Apre il file rinominato "ID", cioè il numero ricevuto dal ServerVerifica
     fd = open(ID, O_RDONLY, 0777);
     /*
-        Se il numero di tessera sanitaria inviato dall'AppVerifca non esiste la variabile globale errno cattura l'evento ed in quel caso 
-        invia un report uguale ad 1 al ServerVerifica, che a sua volta aggiornerà l'AppVerifica dell'inesistenza del codice. In caso 
+        Se il numero di tessera sanitaria inviato dall'AppVerifca non esiste la variabile globale errno cattura l'evento ed in quel caso
+        invia un report uguale ad 1 al ServerVerifica, che a sua volta aggiornerà l'AppVerifica dell'inesistenza del codice. In caso
         contrario invierà un report uguale a 0 per indicare che l'operazione è avvenuta correttamente.
     */
     if (errno == 2) {
@@ -105,11 +106,11 @@ void send_gp(int connect_fd) {
             perror("full_write() error");
             exit(1);
         }
-    } else { 
+    } else {
         //Accediamo in maniera mutuamente esclusiva al file in lettura
         if (flock(fd, LOCK_EX) < 0) {
             perror("flock() error");
-            exit(1); 
+            exit(1);
         }
         if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
             perror("read() error");
@@ -135,9 +136,9 @@ void send_gp(int connect_fd) {
             perror("full_write() error");
             exit(1);
         }
-    } 
+    }
 }
-
+//Funzione che modifica il report di un GP, sotto richiesta dell'ASL
 void modify_report(int connect_fd) {
     REPORT package;
     GP_REQUEST gp;
@@ -218,7 +219,7 @@ void SV_comunication(int connect_fd) {
         perror("full_read() error");
         exit(1);
     }
-    if (start_bit == '0') modify_report(connect_fd); 
+    if (start_bit == '0') modify_report(connect_fd);
     else if (start_bit == '1') send_gp(connect_fd);
     else printf("Dato non valido\n\n");
 }
@@ -282,7 +283,7 @@ int main() {
 
     for (;;) {
 
-        printf("In attesa di nuovi dati\n\n");
+    printf("In attesa di nuovi dati\n\n");
 
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {

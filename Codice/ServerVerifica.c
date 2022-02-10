@@ -359,8 +359,8 @@ int main() {
     }
 
     for (;;) {
+    printf("In attesa di Green Pass da scansionare\n");
 
-        printf("In attesa di Green Pass da scansionare\n");
 
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {

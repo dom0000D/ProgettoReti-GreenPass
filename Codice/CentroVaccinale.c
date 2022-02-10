@@ -87,7 +87,7 @@ void create_expire_date(DATE *expire_date) {
 
     //Dichiarazione strutture per la conversione della data da stringa ad intero
     struct tm *e_date = localtime(&ticks);
-    e_date->tm_mon += 4;           //Sommiamo 4 perchè i mesi vanno da 0 ad 11
+    e_date->tm_mon += 4;           //Sommiamo 4 perchè i mesi vanno da 0 ad 11 (cioè 3 mesi di scadenza)
     e_date->tm_year += 1900;       //Sommiamo 1900 perchè gli anni partono dal 122 (2022 - 1900)
 
     //Effettuiamo il controllo nel caso in cui il vaccino sia stato fatto nel mese di ottobre, novembre o dicembre, comportando un aumento dell'anno
@@ -129,6 +129,7 @@ void create_start_date(DATE *start_date) {
     start_date->year = s_date->tm_year;
 }
 
+//Funzione che invia al ServerVaccinale un Green Pass con data inizio e fini validità e ID
 void send_GP(GP_REQUEST gp) {
     int socket_fd;
     struct sockaddr_in server_addr;
@@ -144,7 +145,7 @@ void send_GP(GP_REQUEST gp) {
 
     //Valorizzazione struttura
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(1025);
+    server_addr.sin_port = htons(1025); //porta
 
     //Conversione dell'indirizzo IP dal formato dotted decimal a stringa di bit
     if (inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr) <= 0) {
@@ -175,7 +176,7 @@ void send_GP(GP_REQUEST gp) {
 
     //Funzione per la gestione della comunicazione con l'utente
 void answer_user(int connect_fd) {
-    char *hub_name[] = {"Milano", "Napoli", "Roma", "Torino", "Firenze", "Palermo", "Bari", "Catanzaro", "Bologna", "Udine"}; //Centri Vaccinali scelti randomicamente 
+    char *hub_name[] = {"Milano", "Napoli", "Roma", "Torino", "Firenze", "Palermo", "Bari", "Catanzaro", "Bologna", "Udine"}; //Centri Vaccinali scelti randomicamente
     char buffer[MAX_SIZE];
     int index, welcome_size, package_size;
     VAX_REQUEST package;
@@ -259,7 +260,7 @@ int main(int argc, char const *argv[]) {
 
     for (;;) {
 
-        printf("In attesa di nuove richieste di vaccinazione\n");
+    printf("In attesa di nuove richieste di vaccinazione\n");
 
         //Accetta una nuova connessione
         if ((connect_fd = accept(listen_fd, (struct sockaddr *)NULL, NULL)) < 0) {

@@ -7,9 +7,9 @@
 #include <sys/types.h>
 #include <sys/socket.h> //contiene le definizioni dei socket.
 #include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
-#define MAX_SIZE 1024
-#define ID_SIZE 11
-#define ACK_SIZE 61
+#define MAX_SIZE 1024   //dim max del buffer
+#define ID_SIZE 11         //dim del codice di tessera sanitaria (10 byte +1 del terminatore)
+#define ACK_SIZE 61        //dim dell'ack ricevuto dal serverVerifica
 #define ASL_ACK 39 //size per gli ACK inviati all'ASL
 
 //Struct del pacchetto dell'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
@@ -99,6 +99,7 @@ int main(int argc, char **argv) {
             perror("fgets() error");
             exit(1);
         }
+        //Controllo sull'input dell'utente
         if (strlen(package.ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
@@ -132,7 +133,7 @@ int main(int argc, char **argv) {
     }
     //Simuliamo un caricamento con la sleep
     sleep(2);
-    //Stampa del messaggio di report ricevuto
+    //Stampa del messaggio del report ricevuto dal serverVerifica
     printf("%s\n", buffer);
 
     exit(0);

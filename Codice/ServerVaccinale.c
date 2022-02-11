@@ -11,8 +11,8 @@
 #include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
 #include <time.h>
 #include <signal.h>     //consente l'utilizzo delle funzioni per la gestione dei segnali fra processi.
-#define MAX_SIZE 2048
-#define ID_SIZE 11
+#define MAX_SIZE 2048   //dim massima del buffer
+#define ID_SIZE 11        //dim del codice della tessera sanitaria (10 byte + 1 byte del terminatore)
 
 //Struct del pacchetto dell'ASL contenente il numero di tessera sanitaria di un green pass ed il suo referto di validità
 typedef struct  {
@@ -80,7 +80,7 @@ void handler (int sign){
     }
 }
 
-    //Funziona che invia un GP richiesto dal ServerVerifica
+//Funzione che invia un GP richiesto dal ServerVerifica
 void send_gp(int connect_fd) {
     char report, ID[ID_SIZE];
     int fd;
@@ -91,7 +91,7 @@ void send_gp(int connect_fd) {
         perror("full_read() error");
         exit(1);
     }
-    //Apre il file rinominato "ID", cioè il numero ricevuto dal ServerVerifica
+    //Apre il file rinominato "ID", cioè il codice ricevuto dal ServerVerifica
     fd = open(ID, O_RDONLY, 0777);
     /*
         Se il numero di tessera sanitaria inviato dall'AppVerifca non esiste la variabile globale errno cattura l'evento ed in quel caso
@@ -112,6 +112,7 @@ void send_gp(int connect_fd) {
             perror("flock() error");
             exit(1);
         }
+        //Lettura del GP dal file aperto in precedenza
         if (read(fd, &gp, sizeof(GP_REQUEST)) < 0) {
             perror("read() error");
             exit(1);
@@ -123,7 +124,6 @@ void send_gp(int connect_fd) {
         }
 
         close(fd);
-
         report = '1';
         //Invia il report al ServerVerifica
         if (full_write(connect_fd, &report, sizeof(char)) < 0) {
@@ -190,7 +190,6 @@ void modify_report(int connect_fd) {
             perror("flock() error");
             exit(1);
         }
-
         report = '0';
     }
     //Invia il report al ServerVerifica
@@ -202,13 +201,11 @@ void modify_report(int connect_fd) {
 
 
   /*
-    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass dak file system relativo al numero di tessera
+    Funzione che tratta la comunicazione con il ServerVerifica, ricava il green pass dal file system relativo al numero di tessera
     sanitaria ricevuto e lo invia al ServerVerifica.
   */
 void SV_comunication(int connect_fd) {
-    char start_bit,
-
-    report = '1';
+    char start_bit;
 
     /*
         Il ServerVaccinale riceve un bit dal ServerVerifica, che può avere valore 0 o 1, siccome sono due funzioni differenti.
@@ -224,7 +221,7 @@ void SV_comunication(int connect_fd) {
     else printf("Dato non valido\n\n");
 }
 
-//Funzione che tratta la conunicazione con il CentroVaccinale e salva i dati ricevuti da questo in un filesystem.
+//Funzione che tratta la comunicazione con il CentroVaccinale e salva i dati ricevuti da questo in un filesystem.
 void CV_comunication(int connect_fd) {
     int fd;
     GP_REQUEST gp;

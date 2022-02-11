@@ -9,8 +9,8 @@
 #include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
 #include <time.h>
 #include <signal.h>     //consente l'utilizzo delle funzioni per la gestione dei segnali fra processi.
-#define MAX_SIZE 1024
-#define ID_SIZE 11
+#define MAX_SIZE 1024      //dim max del buffer
+#define ID_SIZE 11      //dim del codice di tessera sanitaria (10 byte + 1 byte del carattere terminatore)
 #define ACK_SIZE 61
 
 //Struct del pacchetto che il centro vaccinale deve ricevere dall'utente contentente nome, cognome e numero di tessera sanitaria dell'utente
@@ -27,7 +27,7 @@ typedef struct {
     int year;
 } DATE;
 
-//Struct del pacchetto inviato dal centro vaccinale al server vaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP
+//Struct del pacchetto inviato dal centro vaccinale al serverVaccinale contentente il numero di tessera sanitaria dell'utente, la data di inizio e fine validità del GP
 typedef struct {
     char ID[ID_SIZE];
     DATE start_date;
@@ -82,8 +82,8 @@ void handler (int sign){
 
 //Funzione per calcolare la data di scadenza e la data di inizio validità del green pass
 void create_expire_date(DATE *expire_date) {
-    time_t ticks;
-    ticks = time(NULL);
+    time_t ticks;   //struttura per la gestione della data
+    ticks = time(NULL); //Estrapoliamo l'ora esatta della macchina e lo assegnamo alla variabile
 
     //Dichiarazione strutture per la conversione della data da stringa ad intero
     struct tm *e_date = localtime(&ticks);
@@ -112,6 +112,7 @@ void create_expire_date(DATE *expire_date) {
     expire_date->year = e_date->tm_year;
 }
 
+//Funzione per calcolare la data di inizio validità del GP, cioè la data esatta in cui il certificato viene emesso
 void create_start_date(DATE *start_date) {
     time_t ticks;
     ticks = time(NULL);
@@ -189,10 +190,12 @@ void answer_user(int connect_fd) {
     //Stampa un messaggo di benvenuto da inviare all'utente quando si collega al centro vaccinale.
     snprintf(buffer, MAX_SIZE, "***Benvenuto nel centro vaccinale di %s***\nInserisci nome, cognome e numero di tessera sanitaria per inserirli sulla piattaforma.\n", hub_name[index]);
     welcome_size = sizeof(buffer);
+    //Inviamo i byte di scrittura del buffer
     if(full_write(connect_fd, &welcome_size, sizeof(int)) < 0) {
         perror("full_write() error");
         exit(1);
     }
+    //Invio del benvenuto
     if(full_write(connect_fd, buffer, welcome_size) < 0) {
         perror("full_write() error");
         exit(1);

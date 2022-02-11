@@ -11,7 +11,7 @@
 #define ID_SIZE 11      //Size dell'ID (10byte) +1byte del terminatore
 #define ACK_SIZE 61     //Size del messaggio di ACK ricevuto dal CentroVaccinale
 
-//Definiamo il pacchetto applicazione per l'user da inviare al client centro vaccinale
+//Definiamo il pacchetto applicazione per l'user da inviare al centro vaccinale
 typedef struct {
     char name[MAX_SIZE];
     char surname[MAX_SIZE];
@@ -81,6 +81,7 @@ VAX_REQUEST create_package() {
             perror("fgets() error");
             exit(1);
         }
+        //Controllo sull'input dell'utente: il numero di tessera deve essere esattamente di 10 caratteri
         if (strlen(create_pack.ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
@@ -98,7 +99,7 @@ int main(int argc, char **argv) {
     char buffer[MAX_SIZE];
     char **alias;
     char *addr;
-	struct hostent *data;
+	struct hostent *data; //struttura per utilizzare la gethostbyname
 
     if (argc != 2) {
         perror("usage: <host name>"); //perror: Produce un messaggio sullo standard error che descrive l’ultimo errore avvenuto durante una System call o una funzione di libreria.
@@ -139,12 +140,12 @@ int main(int argc, char **argv) {
         perror("connect() error");
         exit(1);
     }
-
-    //Riceve il benevenuto dal centro vaccinale
+    //FullRead per leggere quanti byte invia il Centro Vaccinale
     if (full_read(socket_fd, &welcome_size, sizeof(int)) < 0) {
         perror("full_read() error");
         exit(1);
     }
+    //Riceve il benevenuto dal centro vaccinale
     if (full_read(socket_fd, buffer, welcome_size) < 0) {
         perror("full_read() error");
         exit(1);

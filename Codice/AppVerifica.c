@@ -7,10 +7,10 @@
 #include <sys/types.h>
 #include <sys/socket.h> //contiene le definizioni dei socket.
 #include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
-#define MAX_SIZE 1024
-#define ACK_SIZE 64
-#define WELCOME_SIZE 108
-#define ASL_ACK 39
+#define MAX_SIZE 1024   //dim massima del buffer
+#define ACK_SIZE 64     //dim dell'ack ricevuto dal ServerVerifica
+#define WELCOME_SIZE 108 //dim del messaggio di benvenuto dal ServerVerifica
+#define APP_ACK 39       //dim dell'ack ricevuto dall'AppVerifica
 #define ID_SIZE 11 //10 byte per la tessera sanitaria più un byte per il terminatore
 
 //Legge esattamente count byte s iterando opportunamente le letture. Legge anche se viene interrotta da una System Call.
@@ -98,6 +98,7 @@ int main() {
             perror("fgets() error");
             exit(1);
         }
+        //Controllo sull'input dell'utente
         if (strlen(ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
 
@@ -120,12 +121,13 @@ int main() {
     }
     printf("\n%s\n\n", buffer);
 
-    //Facciamo attendere 3 secondi per completare l'operazione di verifica
     printf("Convalida in corso, attendere...\n\n");
+
+    //Facciamo attendere 3 secondi per completare l'operazione di verifica
     sleep(3);
     
     //Riceve esito scansione Green Pass dal ServerVerifica
-    if (full_read(socket_fd, buffer, ASL_ACK) < 0) {
+    if (full_read(socket_fd, buffer, APP_ACK) < 0) {
         perror("full_read() error");
         exit(1);
     }

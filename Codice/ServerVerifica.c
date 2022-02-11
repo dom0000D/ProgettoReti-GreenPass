@@ -10,9 +10,9 @@
 #include <time.h>
 #include <signal.h>     //consente l'utilizzo delle funzioni per la gestione dei segnali fra processi.
 
-#define MAX_SIZE 1024
+#define MAX_SIZE 1024  //dim massima del buffer
 #define WELCOME_SIZE 108
-#define ID_SIZE 11
+#define ID_SIZE 11    //dim della tessera sanitaria
 #define ACK_SIZE 64
 #define ASL_ACK 39
 

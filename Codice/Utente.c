@@ -7,9 +7,9 @@
 #include <sys/types.h>
 #include <sys/socket.h> //contiene le definizioni dei socket.
 #include <arpa/inet.h>  // contiene le definizioni per le operazioni Internet.
-#define MAX_SIZE 1024
-#define ID_SIZE 11
-#define ACK_SIZE 61
+#define MAX_SIZE 1024   //buffer size
+#define ID_SIZE 11      //Size dell'ID (10byte) +1byte del terminatore
+#define ACK_SIZE 61     //Size del messaggio di ACK ricevuto dal CentroVaccinale
 
 //Definiamo il pacchetto applicazione per l'user da inviare al client centro vaccinale
 typedef struct {
@@ -56,39 +56,39 @@ ssize_t full_write(int fd, const void *buffer, size_t count) {
 //Funzione per la creazione del pacchetto da inviare al centro vaccinale
 VAX_REQUEST create_package() {
     char buffer[MAX_SIZE];
-    VAX_REQUEST temp;
+    VAX_REQUEST create_pack;
 
     //Inserimento nome
     printf("Inserisci nome: ");
-    if (fgets(temp.name, MAX_SIZE, stdin) == NULL) {
+    if (fgets(create_pack.name, MAX_SIZE, stdin) == NULL) {
         perror("fgets() error");
     }
     //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-    temp.name[strlen(temp.name) - 1] = 0;
+    create_pack.name[strlen(create_pack.name) - 1] = 0;
 
     //Inserimento cognome
     printf("Inserisci cognome: ");
-    if (fgets(temp.surname, MAX_SIZE, stdin) == NULL) {
+    if (fgets(create_pack.surname, MAX_SIZE, stdin) == NULL) {
         perror("fgets() error");
     }
     //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-    temp.surname[strlen(temp.surname) - 1] = 0;
+    create_pack.surname[strlen(create_pack.surname) - 1] = 0;
 
     //Inserimento codice tessera sanitaria
     while (1) {
         printf("Inserisci codice tessera sanitaria [Massimo 10 caratteri]: ");
-        if (fgets(temp.ID, MAX_SIZE, stdin) == NULL) {
+        if (fgets(create_pack.ID, MAX_SIZE, stdin) == NULL) {
             perror("fgets() error");
             exit(1);
         }
-        if (strlen(temp.ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
+        if (strlen(create_pack.ID) != ID_SIZE) printf("Numero caratteri tessera sanitaria non corretto, devono essere esattamente 10! Riprovare\n\n");
         else {
             //Andiamo a inserire il terminatore al posto dell'invio inserito dalla fgets, poichè questo veniva contato ed inserito come carattere nella stringa
-            temp.ID[ID_SIZE - 1] = 0;
+            create_pack.ID[ID_SIZE - 1] = 0;
            break;
         }
     }
-    return temp;
+    return create_pack;
 }
 
 int main(int argc, char **argv) {

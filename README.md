@@ -1,5 +1,8 @@
 # ProgettoReti-Green Pass 2022
 
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/56475652/153706779-9b0d2561-d935-400b-8e0c-efc88c33e8ef.png" alt="Sublime's custom image"/>
+</p>
  ![logo](https://user-images.githubusercontent.com/56475652/153706779-9b0d2561-d935-400b-8e0c-efc88c33e8ef.png)
 
 

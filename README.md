@@ -1,9 +1,8 @@
 # ProgettoReti-Green Pass 2022
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/56475652/153706779-9b0d2561-d935-400b-8e0c-efc88c33e8ef.png" alt="Sublime's custom image"/>
+  <img src="https://user-images.githubusercontent.com/56475652/153706779-9b0d2561-d935-400b-8e0c-efc88c33e8ef.png"/>
 </p>
- ![logo](https://user-images.githubusercontent.com/56475652/153706779-9b0d2561-d935-400b-8e0c-efc88c33e8ef.png)
 
 
 Green Pass
@@ -14,7 +13,11 @@ Progettare ed implementare un servizio di gestione dei green pass secondo le seg
 
 Si utilizzi il linguaggio C su piattaforma UNIX utilizzando i socket per la comunicazione tra processi. Corredare l’implementazione di adeguata documentazione.
 
-
+### DESCRIZIONE DETTAGLIATA
+Il progetto proposto rappresenta tutto il mini-mondo per la gestione dei certificati vaccinali, cioè il Green Pass.
+Un utente, dopo aver effettuato la vaccinazione, comunica i propri dati anagrafici e il numero di tessera sanitaria a un Centro Vaccinale, il quale innanzitutto comunicherà l’eventuale ricezione dei dati al cliente e invierà poi il codice della tessera sanitaria, con il periodo di validità del Green Pass a un ServerVaccinale che svolge un ruolo di database dove salva in un filesystem tutti i certificati verdi.
+Abbiamo poi un ClientS che può essere visto come l’app che scansiona i Green Pass, ad esempio Verifica C19, che invia un codice di una tessera sanitaria al ServerG che a sua volta chiede al ServerV di inviargli un Green Pass: così facendo il ServerVerifica effettuerà l’operazione di scansione della validità per poi comunicarlo al ClientS.
+Infine abbiamo un ClientT, identificabile come un’organizzazione sanitaria, come l’ASL, che può invalidare o ripristinare la validità di un Green Pass comunicando il contagio o la guarigione di una persona al ServerG mediante il codice della tessera sanitaria.
  
 ### Presentazione
 - [Documentazione](https://github.com/dom0000D/ProgettoReti-GreenPass/tree/main/Documentazione)
